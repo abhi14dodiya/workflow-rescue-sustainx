@@ -12,7 +12,7 @@ Workflow Rescue helps an app owner's operations team resolve interrupted busines
 
 **Gemini:** The controller gathers mandatory service evidence; Gemini 3.5 Flash-Lite selects recovery actions and requests fresh evidence when conditions change. Credentials stay on the server. All six reviewed fixtures passed the live model evaluation; these are demonstrations, not a general accuracy benchmark.
 
-**Firebase:** A Firebase project is configured. A static Hosting portal is prepared to distribute the deck, video and source links; its public deployment is being finalized. The materials portal is separate from the working backend.
+**Firebase:** Firebase Hosting serves the public submission materials at https://gen-lang-client-0915819772.web.app, including the narrated video, official-template deck and source links. Its public page and downloads were verified without signing in. The materials portal is separate from the working backend.
 
 **Firestore:** Completed recovery reports are saved by the backend using its Google identity. A report created through the actual interface was restored after the app restarted. Browser access is denied by Firestore rules; active workflow execution remains process-local.
 
@@ -35,7 +35,7 @@ The current examples are simulated; no production integrations, measured custome
 | Field | Final value |
 |---|---|
 | Deployed prototype | **Pending durable verified URL** |
-| GitHub repository | https://github.com/abhi14dodiya/workflow-rescue-sustainx (source publication being finalized) |
+| GitHub repository | https://github.com/abhi14dodiya/workflow-rescue-sustainx (public access verified) |
 | Demonstration video | **Pending public 3–4-minute video URL** |
 | Prescribed-template deck | [Official-template PPTX](Workflow-Rescue-Official-Pitch.pptx); registered names still required |
 

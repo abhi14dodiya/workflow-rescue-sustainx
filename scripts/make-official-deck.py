@@ -169,7 +169,7 @@ def build(status):
     firebase_ready = status.get("firebase_verified", False)
     firestore_ready = status.get("firestore_verified", False)
     cloudrun_ready = status.get("cloudrun_verified", False)
-    leader = status.get("leader") or "[Registered team leader name]"
+    leader = status.get("leader") or "TBC"
     home_image = DOCS / "images/gemini-public-home.png"
     interface_image = Path(status.get("interface_image") or home_image)
     verification_image = Path(status.get("verification_image") or ART / "verification.png")
@@ -191,6 +191,8 @@ def build(status):
     text(slide, .45, 4.20, 8.95, .35, f"Team leader name: {leader}", 13, MUTED)
     text(slide, .45, 4.66, 8.95, .55,
          "Problem Statement: Recover interrupted enterprise workflows while preserving customer intent, permissions and a verifiable outcome.", 16)
+    text(slide, .45, 5.28, 8.95, .22,
+         "Theme: Future of Work & Enterprise Productivity", 9.5, MUTED)
     notes(slide, "Theme: Future of Work & Enterprise Productivity. Team spelling must remain sustAInX. "
           "The registered leader name must be confirmed before submission. All payment, inventory and order services are synthetic.")
 
@@ -339,7 +341,7 @@ def build(status):
           "Production costs include integration, durable data, access controls, observability, inference, hosting and review effort.")
 
     slide=prs.slides[10]
-    title(slide,"Snapshots of the prototype","The interface exposes the underlying record; a green animation alone is never proof.")
+    title(slide,"Snapshots of the prototype","Fresh custom input → live Gemini recovery → six independent checks → saved audit.")
     box(slide,.43,1.90,9.10,2.88,"F8FBFF",LINE)
     picture(slide,verification_image,.51,1.98,8.94,2.72)
     text(slide,.54,4.86,8.93,.24,verification_label,11,MUTED)
@@ -379,7 +381,8 @@ def build(status):
     slide=prs.slides[12]
     title(slide,"Additional Details/Future Development (if any)","What must happen before real customer orders enter the system.")
     card(slide,.43,1.89,2.91,2.85,"1  Delivery readiness",
-         "Persistent, publicly accessible hosting.\n\nValidate every required Google integration.\n\nPublish source and a working 3–4 minute demo.",body_size=13)
+         ("Monitor deployed availability.\n\nKeep public source, video and deck accessible.\n\nRecheck the live scenarios after changes." if cloudrun_ready else
+          "Persistent backend hosting for evaluation.\n\nCloud Run remains a deployment gap.\n\nKeep public source, video and deck accessible."),body_size=13)
     card(slide,3.54,1.89,2.91,2.85,"2  Customer pilot",
          "Use an owner's sandbox APIs with scoped authority.\n\nBroaden instruction and incident variation.\n\nMeasure handling time and safe handoff coverage.",accent=PURPLE,body_size=13)
     card(slide,6.65,1.89,2.91,2.85,"3  Production controls",

@@ -9,9 +9,9 @@ The submission instructions supplied by the registered team on 18 October 2026 t
 | Deliverable | Mandatory requirement | Current action |
 |---|---|---|
 | Pitch deck | Use the organizer's prescribed presentation template; an independently designed deck is not a substitute. | Use the prepared [official-template PPTX](Workflow-Rescue-Official-Pitch.pptx), based on the [official template](https://docs.google.com/presentation/d/13rg7vW43mEH6DkpuusAE6fdoEylSFz8waNpE4RLzoUg/edit), preserve its required fields, and inspect the exported PPTX. |
-| Demonstration video | **3 to 4 minutes**, clearly showing working functionality. | Target **3:30**. Record the actual deployed Gemini application; review the output and upload it to a publicly accessible video/file host. |
+| Demonstration video | **3 to 4 minutes**, clearly showing working functionality. | **3:30.05 recorded and reviewed.** Actual public-app Gemini run with narration; [Public MP4](https://gen-lang-client-0915819772.web.app/downloads/workflow-rescue-demo.mp4) verified without signing in. |
 | Prototype URL | Publicly accessible, deployed and working **throughout evaluation**, including its APIs. | A temporary Cloud Shell tunnel is a development preview and cannot satisfy this availability requirement. Validate the durable hosting URL before submission. |
-| GitHub repository | Accessible source code and supporting materials, available throughout evaluation. | Publish the reviewed source, then open the repository while signed out. A ZIP alone does not meet this requirement. |
+| GitHub repository | Accessible source code and supporting materials, available throughout evaluation. | [Public repository](https://github.com/abhi14dodiya/workflow-rescue-sustainx) published; source access verified without credentials. |
 | Brief description | Explain the solution and the use of **Firebase, Firestore, Cloud Run and Gemini**. | See [submission text](SUBMISSION-TEXT.md). Describe implemented integrations only. Verify the dashboard's technology requirements against actual deployment. |
 
 The supplied instructions also say to include all technology mentioned in the submission rules. **Current implementation must therefore be checked for all four named services; mentioning an unimplemented service in the description does not meet the requirement.**
@@ -24,7 +24,7 @@ The deployed Gemini 3.5 Flash-Lite evaluation passed all six reviewed scenarios 
 |---|---|
 | Gemini functionality | Successful fresh recovery on the deployed URL; audit reports `provider: gemini`, nonzero model calls and the observed outcome. Review all six scenarios separately. |
 | Durable deployment | Stable public URL, signed-out browser verification and working backend after a new session. Cloud Shell's session-bound URL is insufficient. |
-| Firebase | Firebase project configured; static materials portal is being finalized. It is not Python backend hosting. |
+| Firebase | Completed: [Firebase materials portal](https://gen-lang-client-0915819772.web.app) and downloads verified. It is not Python backend hosting. |
 | Firestore | Completed: actual UI-generated audit saved and restored after app restart. Active execution remains in memory. |
 | Cloud Run | Deployed service and revision; the current preview runs in Cloud Shell. |
 | Budget | User permits free-tier resources only. Do not assume trial credits, paid Vertex AI, or uncapped billable hosting are permitted. |
@@ -38,11 +38,9 @@ The six built-in incidents use **synthetic service data**. Each live Gemini run 
 
 ## Final order of work
 
-1. Finish deployment and live Gemini checks; resolve any mandatory technology gaps.
-2. Inspect the prescribed-template PPTX and make its claims match the final application.
-3. Publish the source repository and verify public access without an account.
-4. Record the **3:30** deployed demonstration using [DEMO-SCRIPT.md](DEMO-SCRIPT.md), inspect its audio/video, then upload it.
-5. Add the final prototype, repository and video URLs to the deck and submission fields. Open every URL while signed out.
-6. Submit through the registered team's dashboard and retain the organizer's confirmation. Prepared files are not a submitted entry.
+1. Resolve durable Cloud Run hosting and verify the resulting backend. The currently reachable demo is temporary.
+2. Add the registered team details to the prescribed-template PPTX. The video, public materials portal and source repository are prepared.
+3. Add the verified durable prototype URL to the deck and submission fields; open every final link while signed out.
+4. Submit through the registered team's dashboard and retain the organizer's confirmation. Prepared files are not a submitted entry.
 
 Use only measured results from actual artifacts. Any savings example is a scenario calculation, not measured customer savings or evidence that qualification is guaranteed.

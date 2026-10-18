@@ -10,10 +10,12 @@
 | Desktop/mobile browser flow | PASS | `docs/validation/browser-validation.json`; 320px and 390px layouts, Home reload, history race, keyboard controls, reduced motion, no-WebGL fallback and audit download. |
 | Production interface build | PASS | React/Vite built with local fonts and separate Three.js chunk. |
 | Free Firebase/Firestore infrastructure | PASS | `docs/validation/firebase-free-setup.json`; billing disabled, free default database, deny-client rules. |
+| Firebase materials portal | PASS | Public page, PPTX, PDF and narrated MP4 returned HTTP 200; billing remains disabled. This is static materials hosting. |
 | Firestore server access | PASS in Cloud Shell probe | `docs/validation/firestore-cloud-roundtrip.json`; write/read comparison and deletion of the exact synthetic probe. |
 | Custom incident runtime and restart persistence | PASS | `docs/validation/custom-incident-browser.json` and `firestore-runtime-restart.json`; actual UI import, changed recovery outcome, saved audit restored after backend restart. |
+| Public source repository | PASS | Public GitHub repository, README and API source returned HTTP 200 without credentials; published commit matched the reviewed local tree. |
 | Official deck | Organizer template used | `Workflow-Rescue-Official-Pitch.pptx` and `.pdf`; registered names still need confirmation. |
-| Narrated video | Recording pending | Target 210 seconds, actual deployed Gemini footage, offline narration. |
+| Narrated video | PASS: 210.05 seconds | `docs/validation/video-qa.json` and `video-manifest.json`; actual public-app Gemini recording, offline Microsoft Zira narration, complete decode and visual/audio review. |
 | Durable Cloud Run deployment | NOT COMPLETE | Cloud Shell is temporary; Firebase static hosting cannot execute the Python backend. |
 
 ## What the Gemini result means

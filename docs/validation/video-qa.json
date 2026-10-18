@@ -1,0 +1,14 @@
+{
+  "decode_passed": true,
+  "duration_seconds": 210.05,
+  "bytes": 11770564,
+  "audio": [
+    "[Parsed_volumedetect_0 @ 0000029b861f1480] mean_volume: -20.7 dB",
+    "[Parsed_volumedetect_0 @ 0000029b861f1480] max_volume: -2.2 dB"
+  ],
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "model_calls": 4,
+  "run_id": "Pmg8Jo0MFM1ZyqgCii4y7r0M",
+  "visual_review_sheet": "review-contact-sheet.jpg"
+}

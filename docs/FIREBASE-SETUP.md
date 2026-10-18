@@ -36,7 +36,7 @@ The Firestore free quota is 1 GiB stored data, 50,000 reads/day, 20,000 writes/d
 
 ## Hosting status and limits
 
-The Firebase project has a default Hosting site reserved. **The frontend has not been deployed to it.** `firebase.json` and `scripts/prepare-firebase-hosting.py` prepare the assets only after a working backend and routing are verified. The current React frontend requires same-origin `/api` endpoints; a static Firebase site alone cannot execute the FastAPI server.
+The Firebase project now serves the [public submission materials portal](https://gen-lang-client-0915819772.web.app). The page, PPTX, PDF and narrated video were verified without authentication, with billing still disabled. **The interactive Python backend is not hosted on Firebase.** `firebase.json` and `scripts/prepare-firebase-hosting.py` prepare the assets only after a working backend and routing are verified. The current React frontend requires same-origin `/api` endpoints; a static Firebase site alone cannot execute the FastAPI server.
 
 Firebase Spark excludes Cloud Run and Cloud Functions. Do not link billing or bypass the deployment guards under the current free-only instruction. The temporary Cloud Shell tunnel remains temporary even if a static frontend points to it.
 

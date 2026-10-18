@@ -1,0 +1,49 @@
+{
+  "file": "workflow-rescue-demo.mp4",
+  "actual_duration_seconds": 210.05,
+  "narration": "Offline Microsoft Zira desktop voice",
+  "base_url": "https://federation-php-architecture-blocked.trycloudflare.com",
+  "run_id": "Pmg8Jo0MFM1ZyqgCii4y7r0M",
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "model_calls": 4,
+  "edits": [
+    {
+      "section": "intro",
+      "actual_seconds": 17.046,
+      "output_seconds": 22,
+      "playback_speed": 1.0
+    },
+    {
+      "section": "incident",
+      "actual_seconds": 14.391,
+      "output_seconds": 28,
+      "playback_speed": 1.0
+    },
+    {
+      "section": "live",
+      "actual_seconds": 51.625,
+      "output_seconds": 75,
+      "playback_speed": 1.0
+    },
+    {
+      "section": "checks",
+      "actual_seconds": 19.141,
+      "output_seconds": 32,
+      "playback_speed": 1.0
+    },
+    {
+      "section": "audit",
+      "actual_seconds": 12.25,
+      "output_seconds": 28,
+      "playback_speed": 1.0
+    },
+    {
+      "section": "close",
+      "actual_seconds": 14.093,
+      "output_seconds": 25,
+      "playback_speed": 1.0
+    }
+  ],
+  "limitations": "Synthetic services. No claim of durable hosting, production integration or competition submission."
+}

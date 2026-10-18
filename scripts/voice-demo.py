@@ -295,6 +295,8 @@ def render():
             note = f'Recorded live | {speed:.2f}x playback | actual section: {actual:.1f}s | synthetic services'
         else:
             note = 'Actual deployed application | live Gemini run | synthetic business services'
+        if item['id'] == 'checks':
+            note += f" | {run['metrics']['steps']} Gemini proposals + {run['metrics'].get('preflight_reads', 0)} initial controller reads"
         label = OUT / f"{item['id']}-label.png"
         make_label(label, item['title'], note)
         clip = OUT / f"{item['id']}-clip.mp4"

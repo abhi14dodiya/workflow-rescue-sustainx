@@ -11,6 +11,7 @@ import hashlib
 from html import escape
 import json
 from pathlib import Path
+import re
 import shutil
 from urllib.parse import urlsplit
 
@@ -81,8 +82,18 @@ def main():
 
     duration = video_manifest.get("actual_duration_seconds", 0)
     duration_label = f'{int(duration)//60}:{int(duration)%60:02d}' if duration else "3-4 minutes"
+    captions = ROOT / "artifacts/video/workflow-rescue-demo.srt"
+    caption_path = PUBLIC / "downloads/workflow-rescue-demo.vtt"
+    caption_track = ""
+    if captions.is_file() and assets["video"]["ready"]:
+        subtitle_text = captions.read_text(encoding="utf-8-sig")
+        subtitle_text = re.sub(r"(\d\d:\d\d:\d\d),(\d{3})", r"\1.\2", subtitle_text)
+        caption_path.write_text("WEBVTT\n\n" + subtitle_text, encoding="utf-8")
+        caption_track = '<track kind="captions" src="/downloads/workflow-rescue-demo.vtt" srclang="en" label="English">'
+    elif caption_path.is_file():
+        caption_path.unlink()
     if assets["video"]["ready"] and ready:
-        video = f'<video controls preload="none" playsinline aria-label="Narrated working demonstration of Workflow Rescue"><source src="{assets["video"]["path"]}" type="video/mp4">Your browser does not support inline video. <a href="{assets["video"]["path"]}">Download the demonstration</a>.</video>'
+        video = f'<video controls preload="none" playsinline aria-label="Narrated working demonstration of Workflow Rescue"><source src="{assets["video"]["path"]}" type="video/mp4">{caption_track}Your browser does not support inline video. <a href="{assets["video"]["path"]}">Download the demonstration</a>.</video>'
     else:
         video = '<div class="video-placeholder">The narrated demonstration is being finalized.</div>'
     leader = escape(args.team_leader.strip())
@@ -104,10 +115,10 @@ def main():
 <section class="status" aria-labelledby="status-title"><div class="status-header" id="status-title">What is live, and what is included</div><div class="status-row"><strong>Google AI</strong><p>Gemini powers the planner through real API calls. Business systems are simulated.</p></div><div class="status-row"><strong>Firestore persistence</strong><p><span class="verified">Verified after API restart.</span> Completed reports are restored by run ID using server IAM.</p></div><div class="status-row"><strong>Validation</strong><p>83 Python tests and 8 JavaScript tests passed. Live Gemini reached the expected outcomes in 6 of 6 reviewed synthetic fixtures.</p></div><div class="status-row"><strong>Hosting</strong><p>This page and its downloads use Firebase Hosting. {hosting_note}</p></div><div class="status-row"><strong>Source code</strong><p><a href="{github}" target="_blank" rel="noopener noreferrer">github.com/abhi14dodiya/workflow-rescue-sustainx ↗</a><br>{source_note}</p></div><div class="status-row">{leader_row}</div></section></main>
 <footer class="footer"><span>Workflow Rescue by sustAInX · Submission materials portal</span><span><a href="{github}" target="_blank" rel="noopener noreferrer">Source &amp; supporting documentation</a></span></footer></div></body></html>'''
     (PUBLIC / "index.html").write_text(html, encoding="utf-8")
-    (PUBLIC / "styles.css").write_text(CSS + "\n.verified{color:#baf278;font-weight:650}\n", encoding="utf-8")
+    (PUBLIC / "styles.css").write_text(CSS + "\n.verified{color:#baf278;font-weight:650}video{aspect-ratio:1440/986;height:auto}\n", encoding="utf-8")
     (PUBLIC / "favicon.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#baf278"/><path d="M10 10h12v4H14v4h8v4H10v-4h8v-4h-8z" fill="#0c1b11"/></svg>', encoding="utf-8")
     # Only generated portal files and explicitly allowed submission assets are published.
-    permitted = {"index.html", "styles.css", "favicon.svg"} | {"downloads/" + row[2] for row in ASSETS}
+    permitted = {"index.html", "styles.css", "favicon.svg", "downloads/workflow-rescue-demo.vtt"} | {"downloads/" + row[2] for row in ASSETS}
     for path in PUBLIC.rglob("*"):
         if path.is_file() and path.relative_to(PUBLIC).as_posix() not in permitted:
             raise SystemExit("Unexpected file in generated portal; inspect it before publishing.")

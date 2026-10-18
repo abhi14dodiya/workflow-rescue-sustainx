@@ -11,7 +11,7 @@ Updated 18 October 2026. Team: **sustAInX**. Current constraint: **free-tier ser
 - Firebase is enabled. One default Firestore database in `asia-south1` reports `freeTier: true`. Deployed rules deny browser database access; the server uses IAM and Application Default Credentials (ADC).
 - A live Cloud Shell check **wrote, restored and deleted one synthetic Firestore test document**. Evidence: `artifacts/firestore-cloud-roundtrip.json`. Setup and unchanged billing evidence: `artifacts/firebase-free-setup.json`.
 - The actual deployed UI subsequently saved a completed report, and the same report was restored by ID after an API restart. Runtime evidence: `artifacts/custom-incident-browser.json` and `artifacts/firestore-runtime-restart.json`.
-- The API currently runs on a **temporary Cloud Shell VM with a TryCloudflare HTTPS tunnel**. Cloud Run has **not** been deployed. Firebase Hosting has a reserved site and prepared source configuration; its frontend has **not** been published.
+- The API currently runs on a **temporary Cloud Shell VM with a TryCloudflare HTTPS tunnel**. Cloud Run has **not** been deployed. Firebase Hosting now serves the public materials portal at https://gen-lang-client-0915819772.web.app. The portal is not the interactive Python backend.
 
 The current temporary URL and process IDs are recorded remotely in `artifacts/cloud-shell-demo.json`. A reachable temporary tunnel is not a durable competition submission link.
 

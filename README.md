@@ -87,6 +87,10 @@ python scripts/evaluate.py --provider gemini --base-url https://YOUR_APPLICATION
 
 ## Submission materials
 
+[Public materials portal](https://gen-lang-client-0915819772.web.app) ? [Narrated 3:30 demonstration](https://gen-lang-client-0915819772.web.app/downloads/workflow-rescue-demo.mp4) ? [Public source](https://github.com/abhi14dodiya/workflow-rescue-sustainx)
+
+The portal hosts the video and deck on Firebase; it does not provide the interactive backend.
+
 - [Official-template editable PowerPoint](docs/Workflow-Rescue-Official-Pitch.pptx)
 - [Official-template PDF](docs/Workflow-Rescue-Official-Pitch.pdf)
 - [Submission checklist](docs/SUBMISSION.md)
