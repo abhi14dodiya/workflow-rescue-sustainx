@@ -1,0 +1,10 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "workflow_rescue_audits",
+      "fieldPath": "report_json",
+      "indexes": []
+    }
+  ]
+}

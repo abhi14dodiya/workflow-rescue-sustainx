@@ -1,0 +1,73 @@
+"""Generate a six-slide PDF from actual local validation artifacts. No invented results."""
+import argparse
+import html
+import json
+import shutil
+from pathlib import Path
+from playwright.sync_api import sync_playwright
+
+ROOT=Path(__file__).resolve().parents[1]
+DOCS=ROOT/'docs'
+ART=ROOT/'artifacts'
+DOCS.mkdir(exist_ok=True)
+parser=argparse.ArgumentParser(description='Generate the submission PDF with optional public deliverable links.')
+parser.add_argument('--app-url')
+parser.add_argument('--repo-url')
+parser.add_argument('--video-url')
+args=parser.parse_args()
+for url in (args.app_url, args.repo_url, args.video_url):
+    if url and not url.startswith('https://'):
+        parser.error('Submission links must start with https://')
+report=json.loads((ART/'evaluation-rehearsal.json').read_text(encoding='utf-8'))
+azure=None
+azure_path=ART/'evaluation-azure.json'
+if azure_path.exists():
+    candidate=json.loads(azure_path.read_text(encoding='utf-8'))
+    if candidate.get('correct')==candidate.get('total') and not candidate.get('safety_issues'):
+        azure=candidate
+live=None
+for provider in ('vertex','gemini'):
+    path=ART/f'evaluation-{provider}.json'
+    if path.exists():
+        candidate=json.loads(path.read_text(encoding='utf-8'))
+        if candidate.get('correct')==candidate.get('total') and not candidate.get('safety_issues'):
+            live=candidate
+            break
+status='Live Google suite passed' if live else 'Draft · live Google validation pending'
+if (ART/'verification.png').exists():
+    (DOCS/'images').mkdir(exist_ok=True)
+    shutil.copy2(ART/'verification.png',DOCS/'images/verification.png')
+def slide(num,content,dark=False):
+    return f'<section class="slide {"dark" if dark else ""}"><div class="top"><b>workflow rescue.<small>by sustAInX</small></b><span>AI BUILDER CUP 2026</span></div>{content}<footer><span>Future of Work &amp; Enterprise Productivity</span><span>{html.escape(status)} &nbsp; / &nbsp; {num:02}</span></footer></section>'
+development_note = f' Live Azure development separately passed {azure["correct"]}/{azure["total"]} fixtures; Gemini validation remains pending.' if azure and not live else ''
+slides=[]
+slides.append(slide(1,'''<div class="eyebrow">RECOVER THE WORKFLOW. PRESERVE THE INTENT.</div><h1>Every order<br>is a promise.</h1><p class="lead">When an AI workflow stops halfway, reconstruct what happened<br>and verify a recovery that respects the customer.</p><div class="pills"><span>Gemini reasoning</span><span>Controlled execution</span><span>Verified outcomes</span></div><p class="note">Workflow Rescue by sustAInX · working local prototype · simulated business services</p>''',True))
+slides.append(slide(2,'''<div class="eyebrow">ONE PERSON. ONE INTERRUPTED ORDER.</div><h2>The timeout is not the truth.</h2><div class="columns"><div><p class="lead">Maya needs to recover an order for two field kits. The payment request timed out after the charge succeeded. The inventory reservation expired.</p><blockquote>“The exact model matters. One or two extra days is fine. Don't charge us again.”</blockquote></div><div class="facts"><div><b>$498</b><span>One existing payment to reconcile</span></div><div><b>2 kits</b><span>The customer's original model</span></div><div><b>1 change</b><span>Stock disappears during recovery</span></div></div></div><p class="note">Synthetic scenario. Dollar values illustrate the transaction, not measured business savings.</p>'''))
+slides.append(slide(3,'''<div class="eyebrow">A BOUNDED REASONING AND EXECUTION LOOP</div><h2>Gemini proposes. Code verifies.</h2><div class="flow"><article><span>01 / OBSERVE</span><h3>Reconstruct the state</h3><p>Gemini selects payment, stock and dispatch checks. Receipts establish what happened.</p></article><article><span>02 / ADAPT</span><h3>Respond to new evidence</h3><p>A stock-version conflict blocks the initial proposal. Fresh evidence supports a different recovery.</p></article><article><span>03 / ENFORCE</span><h3>Respect the mandate</h3><p>Typed tools, evidence citations, permissions and idempotency constrain every mutation.</p></article><article><span>04 / VERIFY</span><h3>Check the ledgers</h3><p>Independent checks verify money, inventory, intent and final order agreement.</p></article></div><div class="callout">No blind second charge. No unapproved substitute. No claimed recovery when the evidence is missing.</div>'''))
+slides.append(slide(4,f'''<div class="eyebrow">WORKING DEMONSTRATION</div><h2>The promise survives the stock change.</h2><p class="sub">Original items from the next delivery. Existing payment. Evidence for the recovery.</p><img class="verification" src="images/verification.png" alt="Actual rehearsal verification screen"><p class="note">Actual local rehearsal output: deterministic planner, {report['correct']}/{report['total']} expected fixture outcomes, {report['safety_issues']} safety-check failures. These are not Gemini accuracy results.{development_note}</p>'''))
+slides.append(slide(5,'''<div class="eyebrow">TECHNICAL DESIGN AND DIFFERENTIATION</div><h2>Explainable recovery, with boundaries.</h2><div class="columns"><div><h3>The Google stack</h3><ul><li>Cloud Run: FastAPI application and web interface.</li><li>Gemini through Vertex AI or the Gemini API: schema-constrained next-step proposals.</li><li>Runtime service identity: Google credentials stay on the server.</li><li>Independent controller: permissions, versions, idempotency and final checks.</li></ul></div><div><h3>What we can defend</h3><ul><li>A working observation–replanning loop with execution receipts.</li><li>Explicit escalation when evidence is unknown or dispatch is irreversible.</li><li>Six reviewed scenarios and automated controller/browser checks.</li><li>Inspectable comparison with a guarded fixed workflow.</li></ul></div></div><p class="note">Retries and compensation are established techniques. A broader rules engine can also solve these fixtures; incremental AI benefit requires live evaluation and wider semantic variation.</p>'''))
+slides.append(slide(6,'''<div class="eyebrow">FROM PROTOTYPE TO REAL OPERATIONS</div><h2>Recover the task.<br>Keep the customer's promise.</h2><div class="columns"><div><h3>Impact to validate</h3><p>Help enterprise operators resolve interrupted workflows with fewer unnecessary actions and a clearer evidence trail.</p><h3 class="space">Next validation</h3><p>Live Google runs, broader instruction variants, operator feedback and integration with durable service-owned transaction state.</p></div><div class="deliverables"><h3>sustAInX submission handoff</h3><p><b>Application:</b> local at localhost:8080<br>Public Cloud Run URL pending deployment.</p><p><b>Repository:</b> local source ready<br>Public repository URL pending publication.</p><p><b>Demo:</b> 2:45 recording script ready<br>Team recording and video URL pending.</p></div></div><p class="note">All customer data and business services are simulated. No production adoption, measured ROI or contest qualification is claimed.</p>'''))
+# Public links are supplied explicitly; a URL alone does not imply live Google validation.
+for url, placeholder in [
+    (args.app_url, 'local at localhost:8080<br>Public Cloud Run URL pending deployment.'),
+    (args.repo_url, 'local source ready<br>Public repository URL pending publication.'),
+    (args.video_url, '2:45 recording script ready<br>Team recording and video URL pending.'),
+]:
+    if url:
+        escaped=html.escape(url, quote=True)
+        slides[-1]=slides[-1].replace(placeholder, f'<a style="overflow-wrap:anywhere" href="{escaped}">{escaped}</a>')
+css='''@page{size:13.333333in 7.5in;margin:0}*{box-sizing:border-box}body{margin:0;background:#e6e6ec;font-family:"Segoe UI",Arial,sans-serif;color:#25233e}.slide{width:1280px;height:720px;background:#f3f3f9;padding:42px 60px;position:relative;overflow:hidden;break-after:page}.slide:last-child{break-after:auto}.slide.dark{background:#10152c;color:#f2f2fa}.top{display:flex;justify-content:space-between;align-items:center;font-size:13px;border-bottom:1px solid #8987a550;padding-bottom:19px;margin-bottom:40px}.top b{font-size:23px;letter-spacing:-.8px}.top b small{font-size:11px;font-weight:450;letter-spacing:0;margin-left:12px;color:#a99bc9}.top span{font-size:10px;letter-spacing:1.6px;color:#676581}.dark .top span{color:#b9b7d8}.eyebrow{font-size:11px;letter-spacing:2px;color:#58567b;margin-bottom:16px}.dark .eyebrow{color:#adaadb}h1{font-size:83px;line-height:1.07;font-weight:450;letter-spacing:-3px;margin:0 0 21px}h2{font-size:46px;line-height:1.15;font-weight:450;letter-spacing:-1.5px;margin:0 0 27px}h3{font-size:22px;font-weight:550;margin:0 0 16px}.lead{font-size:22px;line-height:1.55;max-width:820px}.dark .lead{color:#bcbadf}.pills{display:flex;gap:14px;margin-top:30px}.pills span{font-size:13px;border:1px solid #6e6b98;border-radius:6px;padding:10px 14px;color:#d1cfed}.note{font-size:12px;color:#666480;line-height:1.5;position:absolute;left:60px;right:60px;bottom:70px}.dark .note{color:#acaacd}footer{position:absolute;left:60px;right:60px;bottom:28px;display:flex;justify-content:space-between;font-size:10px;color:#6c6a85;border-top:1px solid #8987a550;padding-top:13px}.dark footer{color:#b4b2d5}.columns{display:grid;grid-template-columns:1.1fr 1fr;gap:60px}.columns p{font-size:19px;line-height:1.65;margin:0 0 18px}.columns .lead{font-size:23px}.facts{padding-left:35px;border-left:1px solid #c9c8de}.facts>div{padding:0 0 20px}.facts b{font-size:44px;font-weight:450;display:block;color:#413e70}.facts span{font-size:16px;color:#6f6d88}.columns blockquote{font-family:Georgia,serif;font-size:25px;line-height:1.55;border-left:3px solid #8885b7;padding-left:20px;margin:28px 0}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.flow article{padding:26px 22px;background:white;border:1px solid #cecce4;border-radius:10px;min-height:258px}.flow span{font-size:10px;letter-spacing:1px;color:#63608d}.flow h3{font-size:24px;margin:20px 0 14px}.flow p{font-size:17px;line-height:1.6;color:#5e5c7e;margin:0}.callout{background:#dddcef;border-radius:8px;padding:19px 23px;color:#474472;font-size:19px;margin-top:24px}.verification{display:block;max-width:1100px;max-height:350px;object-fit:contain;border:1px solid #d0cfe5;border-radius:9px;margin-top:18px}.sub{font-size:19px;color:#6d6b8c;margin:-12px 0 12px}.columns ul{margin:0;padding-left:22px}.columns li{font-size:19px;line-height:1.55;margin-bottom:15px;color:#565478}.space{margin-top:30px}.deliverables{padding:24px 28px;background:#e6e5f3;border:1px solid #cbc9e1;border-radius:10px}.deliverables p{font-size:17px;line-height:1.6}.deliverables p:last-child{margin-bottom:0}'''
+page='<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Workflow Rescue — Builder Cup submission draft</title><style>'+css+'</style></head><body>'+''.join(slides)+'</body></html>'
+html_path=DOCS/'Workflow-Rescue-Deck.html'
+html_path.write_text(page,encoding='utf-8')
+edge=Path(r'C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe')
+with sync_playwright() as p:
+    browser=p.chromium.launch(headless=True,**({'executable_path':str(edge)} if edge.exists() else {}))
+    tab=browser.new_page(viewport={'width':1280,'height':720})
+    tab.goto(html_path.as_uri(),wait_until='networkidle')
+    overflow=tab.locator('.slide').evaluate_all('(slides) => slides.map((s,i) => ({page:i+1,overflow:s.scrollHeight>s.clientHeight}))')
+    tab.pdf(path=str(DOCS/'Workflow-Rescue-Deck.pdf'),print_background=True,prefer_css_page_size=True)
+    tab.locator('.slide').first.screenshot(path=ART/'deck-cover.png')
+    tab.locator('.slide').nth(4).screenshot(path=ART/'deck-technical.png')
+    browser.close()
+print(json.dumps({'pdf':str(DOCS/'Workflow-Rescue-Deck.pdf'),'slides':6,'layout':overflow,'live_google_validated':bool(live)}))

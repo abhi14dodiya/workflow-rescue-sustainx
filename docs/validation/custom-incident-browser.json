@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "base_url": "https://federation-php-architecture-blocked.trycloudflare.com",
+  "run_id": "C6HOGvQTdvXJOGHm772Y61hZ",
+  "provider": "rehearsal",
+  "checks": [
+    "JSON imported and validated",
+    "unavailable stock escalates",
+    "explicit substitute permission changes outcome",
+    "same price and no new charge",
+    "completed audit saved in Firestore",
+    "audit exported"
+  ],
+  "browser_errors": []
+}

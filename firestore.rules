@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Reports are accessed through the server API with IAM, never directly
+    // by an unauthenticated browser. Do not change this to public read/write.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

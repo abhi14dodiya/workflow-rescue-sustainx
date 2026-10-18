@@ -1,0 +1,10 @@
+{
+  "backend": "firestore",
+  "saved": {
+    "saved": true,
+    "backend": "firestore"
+  },
+  "restored_matches": true,
+  "test_document_deleted": true,
+  "server_adc": true
+}

@@ -1,0 +1,17 @@
+{
+  "leader": null,
+  "app_url": "https://federation-php-architecture-blocked.trycloudflare.com",
+  "repo_url": "https://github.com/abhi14dodiya/workflow-rescue-sustainx",
+  "repo_verified": false,
+  "video_url": "https://gen-lang-client-0915819772.web.app/downloads/workflow-rescue-demo.mp4",
+  "video_verified": false,
+  "firebase_verified": false,
+  "firestore_verified": true,
+  "firestore_status": "Verified after restart",
+  "cloudrun_verified": false,
+  "python_tests": 83,
+  "js_tests": 8,
+  "interface_image": "C:/Users/VS992VN/Documents/workflow-rescue/artifacts/custom-incident-lab.png",
+  "hosting_note": "Current backend: temporary Google Cloud Shell demo. Persistent Cloud Run hosting is not yet deployed.",
+  "link_note": "The current product URL is a temporary session demo, not a durable evaluation deployment."
+}

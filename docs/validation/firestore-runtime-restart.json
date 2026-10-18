@@ -1,0 +1,12 @@
+{
+  "passed": true,
+  "id": "C6HOGvQTdvXJOGHm772Y61hZ",
+  "restored_after_server_restart": true,
+  "persistence": {
+    "saved": true,
+    "backend": "firestore",
+    "restored": true
+  },
+  "outcome": "recovered",
+  "provider": "rehearsal"
+}

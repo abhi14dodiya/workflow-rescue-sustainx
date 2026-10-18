@@ -1,0 +1,14 @@
+*
+!requirements.txt
+!app/
+!app/**
+!web/
+!web/**
+!Dockerfile
+!frontend/
+!frontend/**
+**/node_modules
+**/.vite
+**/__pycache__
+**/*.pyc
+

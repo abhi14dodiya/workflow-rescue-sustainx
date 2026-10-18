@@ -1,0 +1,11 @@
+{
+  "project": "gen-lang-client-0915819772",
+  "billing_enabled": false,
+  "firestore_free_tier": true,
+  "database_location": "asia-south1",
+  "firebase_project_state": "ACTIVE",
+  "firebase_hosting_site": "gen-lang-client-0915819772",
+  "firestore_client_rules": "deny all reads and writes; server IAM only",
+  "ruleset": "projects/gen-lang-client-0915819772/rulesets/99ae8d6a-2835-487e-8f04-6461accff6ca",
+  "billing_enabled_after": false
+}
