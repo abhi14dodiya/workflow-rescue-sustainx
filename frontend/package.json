@@ -7,7 +7,7 @@
     "dev": "vite --host 127.0.0.1",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test src/workflowView.test.js"
+    "test": "node --test src/workflowView.test.js src/runStream.test.js"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.0",

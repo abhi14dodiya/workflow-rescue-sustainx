@@ -335,7 +335,7 @@ def main(live_provider=None, base_url='http://127.0.0.1:8080'):
 
 if __name__ == "__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument('--live-provider',choices=['azure','gemini','vertex','openai'])
+    parser.add_argument('--live-provider',choices=['gemini'])
     parser.add_argument('--base-url',default='http://127.0.0.1:8080')
     args=parser.parse_args()
     main(args.live_provider,args.base_url)

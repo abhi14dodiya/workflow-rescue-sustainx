@@ -11,8 +11,6 @@ Official competition pages and Google design/model references were rechecked on 
 - Gemini available models: https://ai.google.dev/gemini-api/docs/models
 - Gemini model lifecycle: https://ai.google.dev/gemini-api/docs/deprecations
 - Google Cloud Gemini 3.8 Flash: https://docs.cloud.google.com/gemini-enterprise-agent-platform/models/gemini/3-8-flash
-- Vertex inference: https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/inference
-- OpenAI structured output (temporary development adapter): https://developers.openai.com/api/docs/guides/structured-outputs
 - Temporal compensation and durable workflows: https://temporal.io/blog/compensating-actions-part-of-a-complete-breakfast-with-sagas
 - Stripe webhook delivery and duplicate handling: https://docs.stripe.com/webhooks
 - Stripe idempotent requests: https://docs.stripe.com/api/idempotent_requests

@@ -7,11 +7,11 @@ An operations recovery prototype for orders interrupted between payment, stock a
 ## Current verified state
 
 - Live Gemini API: **6/6 reviewed fixtures passed**, with zero safety-check failures, using `gemini-3.5-flash-lite`. See [the actual evaluation](docs/validation/evaluation-gemini.json).
-- **83 Python tests and 8 JavaScript tests passed.** Desktop/mobile browser checks passed against the public application.
+- **81 Python tests, 11 frontend tests and 137 Node compatibility tests passed** after adding request-bound recovery streaming. Local browser checks passed for JSON import, streaming recovery and audit export. Earlier public-app validation is retained separately.
 - Custom incident lab: change stock, payment visibility, dispatch state and explicit permissions, or import a small validated JSON incident. These are new simulations, not recorded outcomes.
 - Firebase project and free Firestore database created. The server can persist and restore completed audit reports using its Google identity. Browser access to Firestore is denied by rules.
-- Temporary public demo: https://federation-php-architecture-blocked.trycloudflare.com . **This stops when its Cloud Shell session ends and is not a durable evaluation deployment.**
-- Durable Cloud Run hosting remains unresolved under the owner's no-paid-usage requirement. Firebase static hosting cannot run this Python backend.
+- **[Open the live application](https://workflow-rescue-112348114226.us-central1.run.app).** The Node runtime runs on Google Cloud Run. A fresh browser-uploaded incident completed with two real Gemini calls, saved its audit to Firestore, and restored it after a new revision on the same URL on 19 October 2026.
+- The [Firebase materials page](https://gen-lang-client-0915819772.web.app) and video remain available. Hosting uses a separate billing-enabled project within the owner's $5–$10 monthly target; the Gemini/Firestore project remains unbilled. See [hosting and cost controls](docs/MANAGED-HOSTING.md).
 
 ## Run locally
 
@@ -43,7 +43,7 @@ GEMINI_API_KEY=YOUR_SERVER_SIDE_KEY
 FIRESTORE_PROJECT_ID=YOUR_FIREBASE_PROJECT_ID
 ```
 
-The public demo uses the Gemini Developer API Free tier. It does not use Vertex AI. A Google API key cannot simply replace an Azure credential at an Azure endpoint; choose the Gemini adapter.
+Gemini Developer API is the only live AI integration. The public demo uses its Free tier with a server-only API key. The only other planner is explicitly labelled Rehearsal, which makes no AI calls.
 
 Requests are spaced at least 15 seconds apart within one server process. Rejected 429/503 requests have bounded retries; daily exhaustion stops rather than upgrading or falling back to paid providers. Google's actual quotas remain authoritative. On this account, Gemini 3.8 Flash reached its 20-request daily limit; the tested deployment intentionally selects Flash-Lite. No rotation or silent provider fallback occurs.
 
@@ -51,7 +51,7 @@ The server gathers the mandatory initial payment, inventory and dispatch observa
 
 The optional `DEMO_ACCESS_TOKEN` gates live calls. There are bounded planning steps, concurrent-run limits and an hourly process budget. **These controls are not cloud billing caps.**
 
-See [Google setup](docs/GOOGLE-SETUP.md) and [Firebase/Firestore setup](docs/FIREBASE-SETUP.md) for current infrastructure and limitations. The old `deploy-gcp` scripts are guarded legacy Vertex/Cloud Run scripts; do not use them for this free-only deployment.
+See [managed hosting](docs/MANAGED-HOSTING.md), [Google setup](docs/GOOGLE-SETUP.md) and [Firebase/Firestore setup](docs/FIREBASE-SETUP.md) for infrastructure and limitations. The old `deploy-gcp` scripts are retired guards from the previous free-only phase. Historical development evidence is retained separately; see [audit provenance](docs/QA.md#historical-development-evidence).
 
 ## Try an incident
 
@@ -91,8 +91,8 @@ python scripts/evaluate.py --provider gemini --base-url https://YOUR_APPLICATION
 
 The portal hosts the video and deck on Firebase; it does not provide the interactive backend.
 
-- [Official-template editable PowerPoint](docs/Workflow-Rescue-Official-Pitch.pptx)
-- [Official-template PDF](docs/Workflow-Rescue-Official-Pitch.pdf)
+- [Official-template editable PowerPoint](docs/Workflow-Rescue-Official-Pitch-Reviewed.pptx)
+- [Official-template PDF](docs/Workflow-Rescue-Official-Pitch-Reviewed.pdf)
 - [Submission checklist](docs/SUBMISSION.md)
 - [Brief description](docs/SUBMISSION-TEXT.md)
 - [3:30 narrated demonstration script](docs/DEMO-SCRIPT.md)
@@ -100,4 +100,4 @@ The portal hosts the video and deck on Firebase; it does not provide the interac
 - [Impact assumptions](docs/IMPACT.md)
 - [Architecture](docs/ARCHITECTURE.md) and [sources](docs/SOURCES.md)
 
-The prescribed deck, a **3-4 minute working demonstration**, accessible source repository and a prototype that remains functional throughout judging are required. Pending team details and durable hosting must be resolved before calling the submission complete. No competition submission or finalist result is implied.
+The prescribed deck, a **3-4 minute working demonstration**, accessible source repository and a prototype that remains functional throughout judging are required. Confirm registered team details in the submission form. No competition submission or finalist result is implied.

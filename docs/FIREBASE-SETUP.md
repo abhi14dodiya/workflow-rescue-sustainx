@@ -14,7 +14,7 @@ Set this server environment variable:
 FIRESTORE_PROJECT_ID=gen-lang-client-0915819772
 ```
 
-The module uses Google Application Default Credentials and the Firestore REST API. A Cloud Run deployment should use its attached service account with an appropriate Firestore data role. An authorized Cloud Shell session supplies ADC through its metadata broker. If that session authorization expires, use `gcloud cloud-shell ssh --authorize-session --command=true` from the authenticated local terminal; this was verified to restore ADC without exporting keys. No service-account private key or Gemini API key is needed for Firestore. `FIRESTORE_PROJECT_ID` is deliberately separate from provider configuration; enabling persistence does not enable Vertex AI.
+The module uses Google Application Default Credentials and the Firestore REST API. A Cloud Run deployment should use its attached service account with an appropriate Firestore data role. An authorized Cloud Shell session supplies ADC through its metadata broker. If that session authorization expires, use `gcloud cloud-shell ssh --authorize-session --command=true` from the authenticated local terminal; this was verified to restore ADC without exporting keys. No service-account private key or Gemini API key is needed for Firestore. `FIRESTORE_PROJECT_ID` is separate from model configuration; persistence uses a Google identity while Gemini uses its own server-only API key.
 
 The deployed `firestore.rules` deny all browser reads and writes. The API accesses reports using server IAM. Reports are retrievable through the application by their unguessable run IDs; do not upload real customer data into this public prototype.
 
@@ -38,9 +38,9 @@ The Firestore free quota is 1 GiB stored data, 50,000 reads/day, 20,000 writes/d
 
 The Firebase project now serves the [public submission materials portal](https://gen-lang-client-0915819772.web.app). The page, PPTX, PDF and narrated video were verified without authentication, with billing still disabled. **The interactive Python backend is not hosted on Firebase.** `firebase.json` and `scripts/prepare-firebase-hosting.py` prepare the assets only after a working backend and routing are verified. The current React frontend requires same-origin `/api` endpoints; a static Firebase site alone cannot execute the FastAPI server.
 
-Firebase Spark excludes Cloud Run and Cloud Functions. Do not link billing or bypass the deployment guards under the current free-only instruction. The temporary Cloud Shell tunnel remains temporary even if a static frontend points to it.
+The application now runs on the Node runtime in the separate billing-enabled project `workflow-rescue-host-562392`, following the owner's $5?$10 monthly hosting authorization. Its Cloud Run runtime identity has `roles/datastore.user` on the original data project. `starter/audit-store.mjs` implements the same audit persistence contract through the metadata service and Firestore REST API.
 
-Google AI Studio Starter Tier can publish up to two Cloud Run services without a billing account for eligible accounts. Google says an active or prior paid billing account may make an account ineligible. Its documented web backend runtime is Node.js; direct deployment of this existing Python Dockerfile through Starter Tier has not been verified. No durable Cloud Run deployment has been completed by these setup steps.
+The original Firebase/Gemini project remains unbilled. [Managed hosting](MANAGED-HOSTING.md) records the stable application URL, spending controls and successful live Gemini / post-revision Firestore restoration checks. The temporary Cloud Shell tunnels are retired.
 
 ## Sources
 
@@ -50,4 +50,4 @@ Google AI Studio Starter Tier can publish up to two Cloud Run services without a
 - [Google Cloud Starter Tier](https://docs.cloud.google.com/docs/starter-tier)
 - [AI Studio web runtime](https://ai.google.dev/gemini-api/docs/aistudio-build-mode)
 
-Verified 18 October 2026. Recheck eligibility and quotas before changing deployment plans.
+Updated 19 October 2026. Preserve the original project's unbilled status when updating the separate Cloud Run deployment.

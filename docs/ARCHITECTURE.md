@@ -40,7 +40,7 @@ flowchart TD
 
 For live runs the controller first gathers the three mandatory service observations. `app/agent.py` then calls the provider with a JSON schema for a single next-step proposal. The runner returns tool evidence in the next request, creating a bounded observation/action loop. It uses Gemini's structured output rather than a framework-managed autonomous agent. Provider-specific errors are classified without publishing raw error bodies, tokens or keys.
 
-The current public app selects Gemini Developer API with a server-only key. Optional Firestore persistence uses a separate Google identity. Legacy Vertex and development adapters remain available in source but are not configured in the public runtime. There is no automatic fallback from a failed model call to a different provider or deterministic output.
+Gemini Developer API is the only live AI integration, with a server-only key. The other planner is transparent no-AI rehearsal. Optional Firestore persistence uses a separate Google identity. A failed Gemini request does not automatically switch to another model or deterministic output.
 
 ## What is and is not tested
 
@@ -62,11 +62,11 @@ The baseline is a competent bounded fixed workflow that reads authorities and sa
 
 React supplies this projection to both the Three.js scene and the SVG fallback. The camera responds to scroll and drag independently of business state. Replay advances the cursor through existing events without calling the run API or any model. Service links share evidence focus with the recovery desk; the exact receipt expands and receives keyboard focus.
 
-## Azure development and Google migration
+## Planner configuration and audit provenance
 
-The Azure adapter uses the Responses API on the configured resource's `/openai/v1/responses` endpoint, an Azure `api-key` header and the actual deployment name. The OpenAI adapter retains its own bearer credential. All providers emit the same Pydantic-validated action shape and use the same execution controller. An incomplete response, refusal or invalid tool is rejected without execution or automatic fallback.
+`DEFAULT_PROVIDER` controls the initial planner selection. The supported choices are `gemini` and `rehearsal`; the frontend does not expose retired providers. The interface starts no model request on page load. Credentials remain on the server, and public configuration exposes only model names and configuration status.
 
-`DEFAULT_PROVIDER` controls initial selection only. The frontend never starts a paid request on load. Credentials remain on the server; public configuration exposes only provider labels, deployment/model names and configuration status. The local live Azure suite passed all six reviewed development fixtures; The deployed Gemini 3.5 Flash-Lite suite now separately passed all six reviewed fixtures with zero safety-check failures. Vertex deployment remains unverified.
+The deployed Gemini 3.5 Flash-Lite suite passed all six reviewed fixtures with zero safety-check failures. Historical reports remain unchanged and identify the provider that actually produced them. Opening an older report does not re-label it Gemini or enable its retired provider for a new run. See [historical development evidence](QA.md#historical-development-evidence).
 
 ## Continuous navigation
 

@@ -7,8 +7,8 @@ from collections import OrderedDict
 from pathlib import Path
 from typing import Literal
 
-from dotenv import load_dotenv
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+from .environment import configure_environment
+configure_environment(Path(__file__).resolve().parents[1] / ".env")
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
@@ -21,6 +21,7 @@ from .runner import fixed_baseline, run_recovery
 from .scenarios import SCENARIOS, public_scenarios, scenario
 from .incidents import IncidentInput
 from . import audit_store
+from .streaming import RunStreamResponse
 
 ROOT = Path(__file__).resolve().parents[1]
 app = FastAPI(title="Workflow Rescue", version="0.1.0", docs_url="/api/docs", redoc_url=None)
@@ -33,7 +34,7 @@ ACTIVE = 0
 class RunRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
     scenario_id: str = "stock-race"
-    provider: Literal["rehearsal", "gemini", "vertex", "openai", "azure"] = "rehearsal"
+    provider: Literal["rehearsal", "gemini"] = "rehearsal"
     custom_incident: IncidentInput | None = None
 
 @app.middleware("http")
@@ -59,7 +60,7 @@ def config():
     providers = provider_options()
     preferred = os.getenv("DEFAULT_PROVIDER", "rehearsal")
     default = next((p["id"] for p in providers if p["id"] == preferred and p["configured"]), "rehearsal")
-    return {"providers": providers, "default_provider": default, "simulated_services": True,
+    return {"providers": providers, "default_provider": default, "simulated_services": True, "run_transport": "stream",
             "live_token_required": bool(os.getenv("DEMO_ACCESS_TOKEN")), "max_steps": 12,
             "storage": "Firestore stores completed audits; active runs remain in one process." if audit_store.configured() else "Ephemeral single-process demo; reports can be exported.",
             "audit_persistence": audit_store.configured()}
@@ -133,8 +134,11 @@ async def start_run(body: RunRequest, request: Request):
             raise HTTPException(429, "The demo's run capacity has been reached.")
         del RUNS[inactive]
     RUNS[identifier] = record
-    async def work():
+    def release_slot():
         global ACTIVE
+        ACTIVE -= 1
+
+    async def work(release=True):
         try:
             record["baseline"] = await fixed_baseline(fixture)
             await run_recovery(record, fixture)
@@ -145,8 +149,16 @@ async def start_run(body: RunRequest, request: Request):
                 record['persistence'] = await audit_store.save_audit(stored_record)
             finally:
                 record.update(status=terminal_status, phase='Finished')
+        except Exception:
+            record.update(status='error', phase='Finished', error={
+                'code': 'INTERNAL_ERROR',
+                'message': 'Recovery could not finish. Review the recorded actions before trying again.',
+            })
         finally:
-            ACTIVE -= 1
+            if release:
+                release_slot()
+    if 'text/event-stream' in request.headers.get('accept', ''):
+        return RunStreamResponse(record, lambda: work(release=False), release_slot)
     task = asyncio.create_task(work())
     TASKS.add(task)
     task.add_done_callback(TASKS.discard)

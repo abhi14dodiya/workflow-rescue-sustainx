@@ -28,7 +28,7 @@ No published numerical qualifying cutoff or reliable finalist probability was fo
 - Three explicitly simulated boundaries: payments, inventory and order/dispatch.
 - Six reviewed incident fixtures plus a validated editable/JSON-import incident lab, with an optional stock race between observation and reservation.
 - A real execution controller; the model cannot call arbitrary code, charge cards or ship orders.
-- Gemini API and Vertex AI adapters, temporary Azure OpenAI and OpenAI adapters, and clearly labelled deterministic rehearsal.
+- Gemini Developer API as the only live AI integration, plus clearly labelled deterministic rehearsal that makes no AI calls.
 - A web interface, downloadable audit, baseline comparison, automated state/controller tests and browser checks.
 
 ## Why this project, finally

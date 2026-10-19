@@ -54,87 +54,34 @@ def test_google_incomplete_or_blocked_response_cannot_propose_action(monkeypatch
         asyncio.run(Planner('gemini').generate({'test':'request'}))
     assert caught.value.code == 'INCOMPLETE_MODEL_OUTPUT'
 
-@pytest.mark.parametrize('provider,location', [('gemini','global'), ('vertex','global'), ('vertex','us-central1')])
-def test_google_auth_routing_schema_and_thought_filter(monkeypatch, provider, location):
-    from types import SimpleNamespace
-    import google.auth
+def test_gemini_auth_schema_and_thought_filter(monkeypatch):
     monkeypatch.setenv('GEMINI_API_KEY', 'gemini-test-only')
-    monkeypatch.setenv('GOOGLE_CLOUD_PROJECT', 'example-project')
-    monkeypatch.setenv('GOOGLE_CLOUD_LOCATION', location)
-    monkeypatch.setenv('GEMINI_MODEL', 'gemini-3.8-flash')
-    monkeypatch.setenv('VERTEX_MODEL', 'gemini-3.8-flash')
-    credentials = SimpleNamespace(token='runtime-test-token', refresh=lambda request: None)
-    monkeypatch.setattr(google.auth, 'default', lambda **kw: (credentials, 'example-project'))
+    monkeypatch.setenv('GEMINI_MODEL', 'gemini-3.5-flash-lite')
     proposal = {'action':'inspect_payment','explanation':'Inspect the receipt.','evidence_ids':[],'expected_version':None}
     def respond(request):
-        if provider == 'gemini':
-            assert request.url.host == 'generativelanguage.googleapis.com'
-            assert request.headers['x-goog-api-key'] == 'gemini-test-only'
-            assert 'authorization' not in request.headers
-        else:
-            assert request.url.host == ('aiplatform.googleapis.com' if location == 'global' else f'{location}-aiplatform.googleapis.com')
-            assert f'/projects/example-project/locations/{location}/' in request.url.path
-            assert request.headers['authorization'] == 'Bearer runtime-test-token'
-            assert 'x-goog-api-key' not in request.headers
-        assert request.url.path.endswith('/gemini-3.8-flash:generateContent')
+        assert request.url.host == 'generativelanguage.googleapis.com'
+        assert request.headers['x-goog-api-key'] == 'gemini-test-only'
+        assert 'authorization' not in request.headers
+        assert request.url.path.endswith('/gemini-3.5-flash-lite:generateContent')
         payload = json.loads(request.content)
         assert payload['generationConfig']['responseMimeType'] == 'application/json'
-        assert 'action' in payload['generationConfig']['responseJsonSchema']['required']
-        assert 'temperature' not in payload['generationConfig']  # use the model's documented default
+        assert set(payload['generationConfig']['responseJsonSchema']['required']) == set(proposal)
+        assert 'temperature' not in payload['generationConfig']
         return httpx.Response(200, json={'candidates':[{'finishReason':'STOP','content':{'parts':[
             {'thought':True,'text':'Non-action text must never enter the action parser.'},
             {'text':json.dumps(proposal)}
         ]}}]})
     original = httpx.AsyncClient
     monkeypatch.setattr(agent.httpx, 'AsyncClient', lambda **kw: original(transport=httpx.MockTransport(respond), **kw))
-    assert asyncio.run(Planner(provider).generate({'test':'request'})).action == 'inspect_payment'
+    assert asyncio.run(Planner('gemini').generate({'test':'request'})).action == 'inspect_payment'
 
-def configure_azure(monkeypatch):
-    monkeypatch.setenv('AZURE_OPENAI_API_KEY', 'azure-test-secret')
-    monkeypatch.setenv('AZURE_OPENAI_BASE_URL', 'https://example.openai.azure.com/openai/v1/')
-    monkeypatch.setenv('AZURE_OPENAI_DEPLOYMENT', 'recovery-deployment')
-    monkeypatch.setenv('OPENAI_API_KEY', 'unrelated-openai-secret')
 
-def test_azure_uses_its_own_endpoint_deployment_and_key(monkeypatch):
-    configure_azure(monkeypatch)
-    proposal = {'action':'inspect_payment','explanation':'Inspect the receipt.','evidence_ids':[],'expected_version':None}
-    def respond(request):
-        assert str(request.url) == 'https://example.openai.azure.com/openai/v1/responses'
-        assert request.headers['api-key'] == 'azure-test-secret'
-        assert 'authorization' not in request.headers
-        payload = json.loads(request.content)
-        assert payload['model'] == 'recovery-deployment' and payload['store'] is False
-        schema = payload['text']['format']['schema']
-        assert schema['additionalProperties'] is False
-        assert set(schema['required']) == set(proposal)
-        return httpx.Response(200,json={'status':'completed','output':[{'content':[{'type':'output_text','text':json.dumps(proposal)}]}],'usage':{'input_tokens':20,'output_tokens':12}})
-    original = httpx.AsyncClient
-    monkeypatch.setattr(agent.httpx,'AsyncClient',lambda **kw: original(transport=httpx.MockTransport(respond),**kw))
-    planner=Planner('azure')
-    assert asyncio.run(planner.generate({'test':'azure'})).action == 'inspect_payment'
-    assert planner.metrics['calls'] == 1 and planner.metrics['input_tokens'] == 20
-
-@pytest.mark.parametrize('body,code', [
-    ({'status':'incomplete','output':[]}, 'INCOMPLETE_MODEL_OUTPUT'),
-    ({'status':'completed','output':[{'content':[{'type':'refusal','refusal':'Declined'}]}]}, 'MODEL_REFUSAL'),
-    ({'status':'completed','output':[{'content':[{'type':'output_text','text':'{"action":"charge_again"}'}]}]}, 'INVALID_MODEL_OUTPUT'),
-])
-def test_azure_does_not_execute_incomplete_refused_or_invalid_output(monkeypatch,body,code):
-    configure_azure(monkeypatch)
-    mock_http(monkeypatch,httpx.Response(200,json=body))
-    with pytest.raises(ProviderError) as caught:
-        asyncio.run(Planner('azure').generate({'test':'rejected output'}))
-    assert caught.value.code == code
-
-def test_azure_auth_failure_is_sanitized_without_fallback(monkeypatch):
-    configure_azure(monkeypatch)
-    mock_http(monkeypatch,httpx.Response(401,json={'error':'azure-test-secret'}))
-    planner=Planner('azure')
-    with pytest.raises(ProviderError) as caught:
-        asyncio.run(planner.generate({'test':'auth'}))
-    assert caught.value.code == 'HTTP_401'
-    assert 'azure-test-secret' not in str(caught.value)
-    assert planner.metrics['calls'] == 1
+def test_unrecognized_provider_cannot_make_network_request(monkeypatch):
+    def unexpected_client(**kwargs):
+        pytest.fail('An unsupported provider reached the network.')
+    monkeypatch.setattr(agent.httpx, 'AsyncClient', unexpected_client)
+    with pytest.raises(ProviderError, match='Configure'):
+        asyncio.run(Planner('unsupported-provider').generate({}))
 
 
 def typed_response():

@@ -1,4 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { readRunStream } from '../runStream.js';
+
+const supportedProviders = new Set(['gemini', 'rehearsal']);
+
+function availableProvider(preferred, providers = []) {
+  return providers.find(p => p.id === preferred)?.id
+    || providers.find(p => p.id === 'gemini' && p.configured)?.id
+    || 'rehearsal';
+}
 
 function readHistory() {
   try {
@@ -24,6 +33,7 @@ export function useRecovery() {
   const generation = useRef(0);
   const timer = useRef(null);
   const mounted = useRef(true);
+  const runAbort = useRef(null);
 
   const request = useCallback(async (path, options = {}) => {
     const headers = { 'Content-Type': 'application/json', ...options.headers };
@@ -40,9 +50,14 @@ export function useRecovery() {
     mounted.current = true;
     const controller = new AbortController();
     Promise.all([request('/api/config', { signal: controller.signal }), request('/api/scenarios', { signal: controller.signal })])
-      .then(([configuration, fixtures]) => { setConfig(configuration); setScenarios(fixtures); setProvider(configuration.default_provider || 'rehearsal'); })
+      .then(([configuration, fixtures]) => {
+        const providers = configuration.providers.filter(p => supportedProviders.has(p.id));
+        const defaultProvider = availableProvider(configuration.default_provider, providers);
+        setConfig({ ...configuration, providers, default_provider: defaultProvider });
+        setScenarios(fixtures); setProvider(defaultProvider);
+      })
       .catch(e => { if (e.name !== 'AbortError') setError(`Unable to load the workspace: ${e.message}`); });
-    return () => { mounted.current = false; controller.abort(); generation.current++; clearTimeout(timer.current); };
+    return () => { mounted.current = false; controller.abort(); runAbort.current?.abort(); generation.current++; clearTimeout(timer.current); };
   }, [request]);
 
   const remember = useCallback(record => {
@@ -68,11 +83,14 @@ export function useRecovery() {
   }, [request, remember]);
 
   const reset = useCallback(() => {
+    runAbort.current?.abort(); runAbort.current = null;
     generation.current++; clearTimeout(timer.current);
     setRun(null); setError(''); setConnection(null);
   }, []);
   const changeScenario = value => { if (!busy && !editing) { reset(); setScenarioId(value); } };
-  const changeProvider = value => { if (!busy && !checking && !editing) { reset(); setProvider(value); } };
+  const changeProvider = value => {
+    if (supportedProviders.has(value) && !busy && !checking && !editing) { reset(); setProvider(value); }
+  };
   const previewIncident = data => request('/api/incidents/preview', { method: 'POST', body: JSON.stringify(data) });
   const applyIncident = async data => {
     if (busy || checking || editing) throw new Error('Wait for the current request to finish.');
@@ -92,6 +110,18 @@ export function useRecovery() {
     reset(); setBusy(true);
     const epoch = generation.current;
     try {
+      if (config.run_transport === 'stream') {
+        const controller = new AbortController(); runAbort.current = controller;
+        const headers = { 'Content-Type': 'application/json', Accept: 'text/event-stream' };
+        if (token.current) headers['X-Demo-Token'] = token.current;
+        const response = await fetch('/api/runs', { method: 'POST', headers, signal: controller.signal,
+          body: JSON.stringify({ scenario_id: scenarioId, provider, ...(scenarioId === 'custom' ? { custom_incident: customIncident } : {}) }) });
+        await readRunStream(response, record => {
+          if (generation.current === epoch && mounted.current) { setRun(record); remember(record); }
+        });
+        if (generation.current === epoch && mounted.current) { runAbort.current = null; setBusy(false); }
+        return;
+      }
       const created = await request('/api/runs', { method: 'POST', body: JSON.stringify({ scenario_id: scenarioId, provider, ...(scenarioId === 'custom' ? { custom_incident: customIncident } : {}) }) });
       if (generation.current !== epoch || !mounted.current) return;
       setRun({ ...created, provider, events: [], checks: [], metrics: {} });
@@ -115,7 +145,9 @@ export function useRecovery() {
         setScenarios(previous => [...previous.filter(s => s.id !== 'custom'), record.incident]);
         setCustomIncident(record.custom_incident);
       }
-      setScenarioId(record.scenario_id); setProvider(record.provider); setRun(record);
+      setScenarioId(record.scenario_id);
+      // Preserve the historical audit's provider, while future runs use a supported planner.
+      setProvider(availableProvider(record.provider, config?.providers)); setRun(record);
       if (['queued', 'running'].includes(record.status)) { setBusy(true); await poll(id, generation.current); }
       return true;
     } catch (e) { if (generation.current === epoch && mounted.current) setError(e.message); return false; }

@@ -1,0 +1,79 @@
+{
+  "slides": [
+    {
+      "number": 1,
+      "title": "Team Details",
+      "notes": "Workflow Rescue by sustAInX helps an enterprise operations team recover an interrupted order within explicit customer permissions. The working prototype uses synthetic payment, inventory and order services, with real Gemini reasoning and an inspectable audit trail."
+    },
+    {
+      "number": 2,
+      "title": "Brief about the idea",
+      "notes": "The recorded example begins with two original Field Kits and one existing payment of $498. The customer permits a delay of at most one day, but no substitution or extra charge. The reservation has expired, and stock changes during recovery. The task is to find a permitted recovery from the actual evidence."
+    },
+    {
+      "number": 3,
+      "title": "Opportunities",
+      "notes": "Interrupted workflows leave operations, finance and engineering teams reconstructing events across services. Workflow Rescue brings evidence, permissions, attempted actions and final checks into one reviewable record. Its intended benefit is less manual reconstruction and clearer handoffs; handling-time savings and business value still require a customer pilot."
+    },
+    {
+      "number": 4,
+      "title": "List of features offered by the solution",
+      "notes": "An operator can edit a synthetic incident or import validated JSON, then start a fresh model run. Explicit permission fields govern the allowed mutations. The interface exposes evidence, rejected proposals, executed receipts, verification and an exportable audit. Replay shows an existing run without making new model calls."
+    },
+    {
+      "number": 5,
+      "title": "Process flow diagram or Use-case diagram",
+      "notes": "The controller first reads payment, inventory and dispatch. Gemini chooses a recovery action using those observations. The controller checks evidence, permissions, inventory versions and idempotency before execution. A rejected stale-stock proposal prompts fresh evidence and replanning. Independent state checks determine the final outcome."
+    },
+    {
+      "number": 6,
+      "title": "Wireframes/Mock diagrams of the proposed solution",
+      "notes": "This editor contains the same custom input used in the video: two units available, seven incoming units, incoming stock after one day, a maximum permitted delay of one day, no substitution, and a stock race enabled. The imported values are visible and editable; the capture itself starts no recovery."
+    },
+    {
+      "number": 7,
+      "title": "Architecture diagram of the proposed solution",
+      "notes": "The React interface communicates with a FastAPI controller running in Google Cloud Shell. Gemini supplies recovery proposals, and Firestore persists completed audits. Firebase Hosting serves the public submission materials and prototype entry link. Cloud Run is not deployed, and the Cloud Shell runtime remains temporary."
+    },
+    {
+      "number": 8,
+      "title": "Technologies to be used in the solution",
+      "notes": "Gemini handles recovery proposals and replanning, while Pydantic validates the proposed action structure and the controller enforces execution rules. React and Three.js provide the interface and evidence views. Firestore save and restore were verified across an API restart. The public Firebase materials portal is separate from the temporary application runtime."
+    },
+    {
+      "number": 9,
+      "title": "Estimated implementation cost",
+      "notes": "The current Google project has billing disabled, uses the confirmed Gemini Free tier, and has a free Firebase materials portal and Firestore database. The application runs in a temporary Cloud Shell session. A durable production cost estimate must include hosting, inference, integration, storage and operator review; these costs have not been validated in a customer deployment."
+    },
+    {
+      "number": 10,
+      "title": "Snapshots of the prototype",
+      "notes": "This is the actual custom Gemini run shown in the video. It used four Gemini proposals after three initial controller reads, rejected one stale-stock proposal, and completed six independent checks. End-to-end time was 46.4 seconds including free-tier pacing. Its audit was saved in Firestore."
+    },
+    {
+      "number": 11,
+      "title": "Prototype Performance report/Benchmarking",
+      "notes": "Gemini 3.5 Flash-Lite produced the expected outcome on all six reviewed development fixtures with zero failed safety checks. Separately, 83 Python tests and eight JavaScript tests passed. These fixtures are not a held-out accuracy benchmark. The guarded fixed baseline escalates on the stock conflict; a broader deterministic planner can also solve these examples."
+    },
+    {
+      "number": 12,
+      "title": "Additional Details/Future Development",
+      "notes": "The immediate delivery gap is persistent backend hosting for evaluation. A customer pilot would then connect the owner's sandbox APIs under scoped authority and measure handling time, coverage, safe handoffs and cost. Production use also needs service-owned idempotency, tenant access controls, retention and tamper-evident records."
+    },
+    {
+      "number": 13,
+      "title": "Provide links to your",
+      "notes": "The source repository, 3 minute 30 second narrated demonstration and pitch materials are publicly accessible. The prototype link opens the Google Cloud Shell application through a temporary public tunnel. Its availability depends on that session; the materials portal does not make the backend durable."
+    },
+    {
+      "number": 14,
+      "title": "Business value: a pilot hypothesis",
+      "notes": "Stripe documents duplicate webhook delivery and idempotent requests, while Temporal documents partial workflows and compensation. These sources establish the engineering problem and existing controls. They do not establish product adoption, financial savings or superiority over conventional orchestration. The prototype demonstrates bounded recovery of synthetic incidents. The illustrative $250,000 annual staff-capacity figure assumes 10 million orders, one percent requiring recovery, half assisted successfully, ten minutes saved and a $30 hourly staff cost. These inputs are hypothetical and exclude integration, cloud and review costs. It is a scenario calculation, not measured savings."
+    },
+    {
+      "number": 15,
+      "title": "Thank you",
+      "notes": "Workflow Rescue combines adaptive recovery proposals with explicit execution boundaries and inspectable outcomes. Its central promise is to help an authorized operations team recover the workflow while preserving the customer's reviewed permissions."
+    }
+  ]
+}

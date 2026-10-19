@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / "docs"
 ART = ROOT / "artifacts"
 TEMPLATE = DOCS / "AI-Builder-Cup-Official-Template.pptx"
-OUTPUT = DOCS / "Workflow-Rescue-Official-Pitch.pptx"
+OUTPUT = DOCS / "Workflow-Rescue-Official-Pitch-Reviewed.pptx"
 
 INK = "172336"
 MUTED = "53637C"
@@ -54,7 +54,7 @@ def text(slide, x, y, w, h, value, size=15, color=INK, bold=False,
         p = frame.paragraphs[0] if index == 0 else frame.add_paragraph()
         p.text = line
         p.alignment = align
-        p.space_after = Pt(3)
+        p.space_after = Pt(0)
         p.font.name = "Aptos"
         p.font.size = Pt(size)
         p.font.bold = bold
@@ -72,6 +72,9 @@ def box(slide, x, y, w, h, fill=PALE, border=None, rounded=True):
         Inches(x), Inches(y), Inches(w), Inches(h))
     shape.fill.solid()
     shape.fill.fore_color.rgb = rgb(fill)
+    # Do not inherit the organizer theme's heavy default shape shadow.
+    from pptx.oxml.xmlchemy import OxmlElement
+    shape._element.spPr.append(OxmlElement("a:effectLst"))
     if border:
         shape.line.color.rgb = rgb(border)
         shape.line.width = Pt(.8)
@@ -85,8 +88,9 @@ def box(slide, x, y, w, h, fill=PALE, border=None, rounded=True):
 def card(slide, x, y, w, h, title, body, accent=BLUE, fill=PALE, body_size=13):
     box(slide, x, y, w, h, fill, LINE)
     box(slide, x, y, .045, h, accent, rounded=False)
-    text(slide, x+.16, y+.14, w-.32, .36, title, 15, accent, True)
-    text(slide, x+.16, y+.62, w-.32, h-.7, body, body_size, INK)
+    heading_size = 13.5 if h < 1.6 else 15
+    text(slide, x+.16, y+.12, w-.32, .42, title, heading_size, accent, True)
+    text(slide, x+.16, y+.58, w-.32, h-.67, body, body_size, INK)
 
 
 def tag(slide, x, y, w, value, state="ready"):
@@ -97,8 +101,9 @@ def tag(slide, x, y, w, value, state="ready"):
 
 
 def foot(slide, number, note="Synthetic business services. No production customer data."):
-    text(slide, .39, 5.14, 8.68, .23, note, 8.5, MUTED)
-    text(slide, 9.18, 5.14, .40, .23, f"{number:02}", 9, MUTED, align=PP_ALIGN.RIGHT)
+    text(slide, .39, 5.14, 8.68, .24, note, 9, MUTED)
+    visible_number = number - 1 if number > 2 else number
+    text(slide, 9.18, 5.14, .40, .24, f"{visible_number:02}", 9, MUTED, align=PP_ALIGN.RIGHT)
 
 
 def title(slide, original, subtitle=None):
@@ -169,7 +174,7 @@ def build(status):
     firebase_ready = status.get("firebase_verified", False)
     firestore_ready = status.get("firestore_verified", False)
     cloudrun_ready = status.get("cloudrun_verified", False)
-    leader = status.get("leader") or "TBC"
+    leader = status.get("leader") or "________________________"
     home_image = DOCS / "images/gemini-public-home.png"
     interface_image = Path(status.get("interface_image") or home_image)
     verification_image = Path(status.get("verification_image") or ART / "verification.png")
@@ -186,11 +191,11 @@ def build(status):
     source.text_frame.clear()
     source.left, source.top, source.width, source.height = map(Inches, (.39, 3.15, 9.2, 2.12))
     text(slide, .43, 3.20, 8.9, .39, "Team Details", 22, INK, True)
-    text(slide, .44, 3.73, 3.9, .4, "sustAInX", 27, BLUE, True)
-    text(slide, 4.8, 3.77, 4.7, .36, "Workflow Rescue", 23, INK, True)
+    text(slide, .44, 3.73, 3.9, .5, "sustAInX", 27, BLUE, True)
+    text(slide, 4.8, 3.77, 4.7, .45, "Workflow Rescue", 23, INK, True)
     text(slide, .45, 4.20, 8.95, .35, f"Team leader name: {leader}", 13, MUTED)
     text(slide, .45, 4.66, 8.95, .55,
-         "Problem Statement: Recover interrupted enterprise workflows while preserving customer intent, permissions and a verifiable outcome.", 16)
+         "Problem: Payment succeeded, but the order stalled. Recover it using verified evidence and the customer's permissions.", 16)
     text(slide, .45, 5.28, 8.95, .22,
          "Theme: Future of Work & Enterprise Productivity", 9.5, MUTED)
     notes(slide, "Theme: Future of Work & Enterprise Productivity. Team spelling must remain sustAInX. "
@@ -202,14 +207,14 @@ def build(status):
 
     slide = prs.slides[2]
     title(slide, "Brief about the idea", "Workflow Rescue is an operator's recovery workspace for an order stranded between services.")
-    text(slide, .43, 1.84, 5.1, 1.03, "A timeout is\nnot the truth.", 35, INK, True)
-    text(slide, .45, 3.07, 4.65, .80,
-         "The charge succeeded. The reservation expired. The customer still expects the original item.", 19)
-    box(slide, .42, 4.11, 4.76, .65, PALE)
-    text(slide, .60, 4.24, 4.4, .46, '“Same item. No extra charge. Two days late is fine.”', 14, BLUE, True)
-    card(slide, 5.65, 1.9, 3.91, .89, "Reconstruct", "Read payment, stock and dispatch evidence.", body_size=12)
-    card(slide, 5.65, 2.99, 3.91, .89, "Recover within authority", "Gemini proposes; code controls each write.", accent=PURPLE, body_size=12)
-    card(slide, 5.65, 4.08, 3.91, .89, "Prove the result", "Independent checks verify or request review.", accent=GREEN, body_size=12)
+    text(slide, .43, 1.84, 4.9, 1.24, "Payment received.\nOrder interrupted.", 29, INK, True)
+    text(slide, .45, 3.13, 4.72, .92,
+         "An operations agent must reconcile the payment, find permitted stock and confirm what happened.", 18)
+    box(slide, .42, 4.22, 4.76, .66, PALE)
+    text(slide, .60, 4.34, 4.4, .47, 'Demo mandate: original item, same price, at most one day late.', 14, BLUE, True)
+    card(slide, 5.65, 1.84, 3.91, 1.00, "Reconstruct the facts", "Read payment, stock and dispatch.", body_size=12.5)
+    card(slide, 5.65, 2.93, 3.91, 1.00, "Recover within authority", "Gemini proposes; code controls writes.", accent=PURPLE, body_size=12.5)
+    card(slide, 5.65, 4.02, 3.91, 1.00, "Verify the outcome", "Confirm the state or request review.", accent=GREEN, body_size=12.5)
     foot(slide, 3)
     notes(slide, "An adopting business supplies scoped permissions to its own service APIs. "
           "This prototype cannot intervene in a bank or another company's transactions. "
@@ -222,25 +227,25 @@ def build(status):
     card(slide, 3.54, 1.87, 2.91, 2.72, "How does it solve it?",
          "Join customer permission, authoritative receipts and guarded execution in one incident.\n\nUncertainty becomes an explicit handoff.", PURPLE)
     card(slide, 6.65, 1.87, 2.91, 2.72, "USP of the solution",
-         "Every attempted action has evidence. Every completed recovery has independent checks.\n\nOperators and reviewers inspect the same record.", GREEN)
+         "Writes require valid evidence. Completed recoveries pass independent checks.\n\nOperators and reviewers inspect the same record.", GREEN)
     text(slide, .50, 4.73, 8.9, .30,
          "Target users: order operations • finance reconciliation • engineering reliability • internal control review", 11, MUTED)
-    foot(slide, 4, "Retries, idempotency and compensation already exist. Incremental AI benefit needs broader evaluation.")
+    foot(slide, 4, "Adoption requires the app owner's scoped API permissions. No authority over third-party transactions.")
     notes(slide, "Stripe documents duplicate webhook delivery and idempotent retries. Temporal documents sagas and compensation. "
           "These sources establish the engineering problem, not product ROI. A broader deterministic planner can also solve these six fixtures.")
 
     slide = prs.slides[4]
     title(slide, "List of features offered by the solution", "One incident, from customer intent to an inspectable business outcome.")
     feature_data = [
-        ("01  Your own incident", "Edit stock, payment and permissions, or import a validated JSON incident.", BLUE),
-        ("02  Evidence gathering", "The controller reads payment, inventory and order evidence before planning.", PURPLE),
-        ("03  Adaptive proposal", "Request fresh evidence after a stock-version conflict.", BLUE),
-        ("04  Guarded execution", "Check typed tools, evidence, versions and idempotency.", GREEN),
-        ("05  Independent outcome", "Verify state or hand off when payment or dispatch is uncertain.", GREEN),
-        ("06  Inspectable record", "Replay real events, open receipts and export the run's JSON audit.", PURPLE),
+        ("01  Custom incidents", "Edit synthetic evidence and permissions, or import JSON.", BLUE),
+        ("02  Evidence gathering", "Read payment, inventory and dispatch before planning.", PURPLE),
+        ("03  Adaptive recovery", "Refresh evidence and replan when stock changes.", BLUE),
+        ("04  Execution guards", "Enforce evidence, permissions, versions and idempotency.", GREEN),
+        ("05  Outcome checks", "Verify the business state or escalate for review.", GREEN),
+        ("06  Audit and history", "Inspect receipts, replay events and export the audit.", PURPLE),
     ]
     for i, (heading, body, accent) in enumerate(feature_data):
-        card(slide, .43+(i%3)*3.11, 1.9+(i//3)*1.52, 2.91, 1.32, heading, body, accent, body_size=12.3)
+        card(slide, .43+(i%3)*3.11, 1.83+(i//3)*1.58, 2.91, 1.42, heading, body, accent, body_size=13)
     foot(slide, 5, "Replay is read-only playback of recorded events. A fresh run makes new model calls.")
     notes(slide, "The incident lab accepts editable synthetic service states and explicit permission toggles, or a schema-validated JSON incident. "
           "Imported records do not grant authority over any real service. Customer notes do not override explicit reviewed permissions. "
@@ -252,10 +257,10 @@ def build(status):
              (3.76, 1.9, "2  Controller observes", "Mandatory payment, stock\nand dispatch reads."),
              (7.07, 1.9, "3  Gemini proposes", "Recovery action based on\nthe observed evidence."),
              (7.07, 3.71, "4  Controller checks", "Permissions • versions\nevidence • idempotency"),
-             (3.76, 3.71, "5  Execute bounded tool", "Receipt confirms the write.\nChanged state is observed."),
+             (3.76, 3.71, "5  Execute allowed step", "Record the write receipt.\nObserve the changed state."),
              (.45, 3.71, "6  Verify or hand off", "Independent ledger checks\nplus exportable audit.")]
     for x,y,h,b in nodes:
-        card(slide,x,y,2.47,1.11,h,b,body_size=11.5)
+        card(slide,x,y,2.47,1.24,h,b,body_size=11.5)
     arrow(slide,2.95,2.43,3.72,2.43)
     arrow(slide,6.26,2.43,7.03,2.43)
     arrow(slide,8.3,3.04,8.3,3.67)
@@ -270,19 +275,18 @@ def build(status):
           "Do not imply the model authorizes itself or independently certifies the result.")
 
     slide = prs.slides[6]
-    title(slide, "Wireframes/Mock diagrams of the proposed solution (optional)", "Implemented incident lab: change evidence, review explicit permissions, then run a new recovery.")
-    box(slide,.43,1.85,5.49,2.95,PALE)
-    picture(slide,interface_image,.45,1.87,5.45,2.91)
-    card(slide,6.20,1.82,3.34,.99,"Orient", "Home introduces the incident and service state.", body_size=11.8)
-    card(slide,6.20,2.88,3.34,.99,"Act", "Edit or import an incident; start a fresh run.",accent=PURPLE, body_size=11.8)
-    card(slide,6.20,3.94,3.34,.99,"Review", "History and receipts reconstruct each run.",accent=GREEN, body_size=11.8)
-    foot(slide,7,"Actual application screenshot. Imported JSON is schema-validated; a customer note cannot override permission controls.")
+    title(slide, "Wireframes / implemented interface", "The incident editor accepts new inputs. Permissions are explicit, separate from the customer note.")
+    text(slide,.46,1.78,9.0,.30,"Evidence: original stock 2 → incoming stock 7 → approved delay 1 day",13,BLUE,True)
+    picture(slide,DOCS/"images/pitch-incident-values.png",.44,2.12,9.10,2.05)
+    text(slide,.46,4.18,9.0,.30,"Explicit permissions: delay allowed; substitution forbidden; stock conflict enabled",12,PURPLE,True)
+    picture(slide,DOCS/"images/pitch-incident-permissions.png",.44,4.48,9.10,.54)
+    foot(slide,7,"Cropped views of the actual editor using the video's incident. All service records are synthetic.")
     notes(slide,"This is an actual incident-lab capture, not a designed mock. "
           "Operators can change stock, payment availability and reviewed permissions, or import a JSON incident. "
           "Animation is a state projection and cannot make a failed run pass. Desktop and mobile browser checks were run locally.")
 
     slide = prs.slides[7]
-    title(slide, "Architecture diagram of the proposed solution", "Solid boxes: implemented application path. Google deployment status is stated separately.")
+    title(slide, "Architecture diagram of the proposed solution", "Gemini proposes actions. The backend enforces authority and verifies the resulting state.")
     card(slide,.43,1.92,2.22,1.13,"React + Three.js","Incident desk\nEvidence and audit UI", body_size=12)
     card(slide,3.18,1.92,2.75,1.13,"FastAPI controller","Bounded agent loop\nAuthority + verification",accent=PURPLE,body_size=12)
     card(slide,6.60,1.92,2.93,1.13,"Gemini API","Structured recovery proposals\nAPI key stays server-side",accent=GREEN,body_size=12)
@@ -306,7 +310,7 @@ def build(status):
           "Do not call the in-memory simulator a durable distributed transaction engine. "+json.dumps({k:status.get(k,False) for k in ("firebase_verified","firestore_verified","cloudrun_verified")}))
 
     slide = prs.slides[8]
-    title(slide, "Technologies to be used in the solution", "The Google services have distinct roles; the pitch does not treat planned services as deployed.")
+    title(slide, "Technologies to be used in the solution", "Current implementation and deployment status.")
     table = [
         ("Gemini API", "Evidence-linked recovery proposal and conflict replanning", "Live suite passed" if google_pass else "Live validation in progress", google_pass),
         ("Firebase Hosting", "Public submission portal and prototype entry link", "Verified" if firebase_ready else "Pending deployment", firebase_ready),
@@ -322,36 +326,31 @@ def build(status):
         text(slide,2.52,y+.065,4.68,.3,role,11.3,MUTED)
         tag(slide,7.40,y+.064,1.97,state,"ready" if ready else "review")
     text(slide,.51,4.90,8.89,.25,"Verified model: "+model_name+". No automatic fallback to a paid model.",10.2,MUTED)
-    foot(slide,9,"Only explicit, verified status flags mark a deployment complete. Secrets never enter the frontend or deck.")
-    notes(slide,"The current Gemini free-tier API is different from paid Vertex AI. Billing is not linked to the selected GCP project. "
+    foot(slide,9,"Firebase hosts the materials page; the interactive backend currently runs in Cloud Shell.")
+    notes(slide,"The current model integration uses the Gemini Developer API Free tier. Billing is not linked to the selected GCP project. "
           "Cloud Run free allowances are not a guaranteed zero-spend deployment. Public evaluation availability remains a delivery requirement.")
 
     slide = prs.slides[9]
-    title(slide, "Estimated implementation cost (optional)", "Constrain prototype spend; validate business value with a real operations pilot.")
-    card(slide,.43,1.87,4.12,2.76,"Prototype cost boundary",
-         "Build scope: 2–3 day prototype target.\n\nGemini: user's confirmed Free tier.\n\nCurrent hosting: free Cloud Shell session; temporary availability.\n\nPersistent hosting and integration costs still need validation.",body_size=12)
-    box(slide,4.84,1.88,4.70,2.75,GREEN_BG,LINE)
-    text(slide,5.07,2.04,4.15,.32,"ILLUSTRATIVE ANNUAL CAPACITY VALUE",10,GREEN,True)
-    text(slide,5.07,2.51,4.15,.63,"$250,000",36,GREEN,True)
-    text(slide,5.08,3.29,4.10,.90,"10m orders × 1% recovery incidence\n× 50% assisted × 10 minutes saved\n× $30/hour ÷ 60",15,INK)
-    text(slide,.50,4.77,8.87,.31,"Hypothetical inputs, before cloud, integration and review costs. Released capacity is not automatically cash saved.",10.5,MUTED)
-    foot(slide,10,"No measured ROI, customer adoption or global savings claim. A pilot must validate every assumption.")
+    title(slide, "Estimated implementation cost (optional)", "A free-tier prototype today; a metered pilot budget before any production rollout.")
+    card(slide,.43,1.86,4.35,2.96,"Prototype resources",
+         "Gemini Developer API: confirmed Free tier.\n\nFirebase and Firestore: free allowances, project billing disabled.\n\nCloud Shell: temporary development host.",body_size=14)
+    card(slide,5.05,1.86,4.48,2.96,"Pilot cost model",
+         "One-time: connector development, permissions and operational testing.\n\nRecurring: inference, hosting, storage and human review.\n\nPrice after measuring pilot volumes.",accent=PURPLE,body_size=14)
+    foot(slide,10,"Cloud Run is not deployed. A free allowance is not a hard spending cap; no production cost estimate is claimed.")
     notes(slide,"Formula: annual orders times manual recovery incidence times useful coverage times net minutes saved divided by 60 times fully loaded hourly staff cost. "
           "The illustration equals $250,000 gross annual staff capacity. It is not a market estimate, a tested saving, or a budget reduction. "
           "Production costs include integration, durable data, access controls, observability, inference, hosting and review effort.")
 
     slide=prs.slides[10]
-    title(slide,"Snapshots of the prototype","Fresh custom input → live Gemini recovery → six independent checks → saved audit.")
-    box(slide,.43,1.90,9.10,2.88,"F8FBFF",LINE)
-    picture(slide,verification_image,.51,1.98,8.94,2.72)
-    text(slide,.54,4.86,8.93,.24,verification_label,11,MUTED)
-    foot(slide,11,"Selected verification checks from an actual run; the caption identifies the provider used.")
+    title(slide,"Snapshots of the prototype","Actual video run: stale stock rejected, original item recovered, audit saved in Firestore.")
+    picture(slide,verification_image,.43,1.78,9.10,3.11)
+    foot(slide,11,"Gemini 3.5 Flash-Lite • 4 model proposals + 3 initial reads • 1 blocked proposal • 46.4 seconds including pacing.")
     notes(slide,verification_label+
           " This is a capture of the application's computed verification results. The provider and scenario must match its audit record. "
           "Never relabel rehearsal evidence as Gemini evidence.")
 
     slide=prs.slides[11]
-    title(slide,"Prototype Performance report/Benchmarking","Six reviewed development fixtures; useful coverage evidence, not a held-out accuracy benchmark.")
+    title(slide,"Prototype Performance report/Benchmarking","Six reviewed synthetic scenarios, plus automated controller and interface checks.")
     text(slide,.48,1.84,3.18,.38,f"{gemini.get('correct',0) if gemini else 0}/6 live Gemini",22,GREEN if google_pass else AMBER,True)
     text(slide,3.73,1.85,2.73,.33,f"{status.get('python_tests',83)} Python tests",20,BLUE,True)
     text(slide,6.88,1.85,2.56,.33,f"{status.get('js_tests',8)} JavaScript tests",20,BLUE,True)
@@ -368,9 +367,9 @@ def build(status):
         values=[(.57,2.95,label),(3.65,1.83,c.get("expected","")),(5.67,1.77,observed),(8.23,.65,str(c.get("metrics",{}).get("calls",0)))]
         for x,w,value in values:text(slide,x,y,w,.26,value,10.3,color)
     if not cases:text(slide,.55,2.97,8.4,.5,"Gemini evaluation artifact pending. Do not replace this with rehearsal results.",14,AMBER)
-    text(slide,.52,4.69,9.00,.33,
-         f"Rehearsal: {rehearsal.get('correct',0) if rehearsal else 0}/6. Baseline escalates on stock conflict; a broader rules engine can solve these fixtures.",10,MUTED)
-    foot(slide,12,model_name+" • "+str(gemini.get("safety_issues","unknown") if gemini else "unknown")+" safety-check failures • 3 controller reads before each model run. Artifact: "+str(gemini.get("at","not available") if gemini else "not available"))
+    text(slide,.52,4.66,9.00,.34,
+         "Unknown payment and dispatched orders correctly require review. Recovery is not always the safe outcome.",11.5,MUTED)
+    foot(slide,12,"Gemini 3.5 Flash-Lite • 0 safety-check failures in these runs. Development cases, not a held-out accuracy benchmark.")
     notes(slide,"The deck reads artifacts/evaluation-gemini.json at build time. It shows unsuccessful cases as red rather than substituting provider results. "
           "The initial Gemini 3.8 Flash run exhausted its model's free daily allowance. The operator explicitly selected Gemini 3.5 Flash-Lite; "
           "there is no silent provider fallback. The new six-case deployed suite passed. Three controller preflight reads are distinct from the listed model-call counts. "
@@ -379,10 +378,10 @@ def build(status):
           "No finalist probability or superiority claim is inferred from six development fixtures.")
 
     slide=prs.slides[12]
-    title(slide,"Additional Details/Future Development (if any)","What must happen before real customer orders enter the system.")
+    title(slide,"Additional Details/Future Development (if any)","Move from a controlled demonstration to a measurable customer pilot.")
     card(slide,.43,1.89,2.91,2.85,"1  Delivery readiness",
          ("Monitor deployed availability.\n\nKeep public source, video and deck accessible.\n\nRecheck the live scenarios after changes." if cloudrun_ready else
-          "Persistent backend hosting for evaluation.\n\nCloud Run remains a deployment gap.\n\nKeep public source, video and deck accessible."),body_size=13)
+          "Deploy the backend to durable hosting.\n\nCloud Run remains pending.\n\nMonitor availability throughout evaluation."),body_size=13)
     card(slide,3.54,1.89,2.91,2.85,"2  Customer pilot",
          "Use an owner's sandbox APIs with scoped authority.\n\nBroaden instruction and incident variation.\n\nMeasure handling time and safe handoff coverage.",accent=PURPLE,body_size=13)
     card(slide,6.65,1.89,2.91,2.85,"3  Production controls",
@@ -393,10 +392,10 @@ def build(status):
           "The application must remain functional throughout evaluation; the temporary Cloud Shell link does not meet that durability requirement.")
 
     slide=prs.slides[13]
-    title(slide,"Provide links to your:","Public repository, 3–4 minute demonstration, and deployed working product.")
+    title(slide,"Provide links to your:","Public source and narrated demonstration. The current prototype link is temporary.")
     links=[("GitHub Public Repository"+("" if status.get("repo_verified") else " — publication pending"),status.get("repo_url"),"Public source link pending publication."),
            ("Demo Video Link (3–4 minutes)"+("" if status.get("video_verified") else " — upload pending"),status.get("video_url"),"Record against the validated deployment; public video link pending."),
-           ("Final Product Link",status.get("app_url"),"Persistent product deployment is pending.")]
+           ("Product Link — temporary preview" if not cloudrun_ready else "Final Product Link",status.get("app_url"),"Persistent product deployment is pending.")]
     for i,(label,url,fallback) in enumerate(links):
         y=1.91+i*.97
         box(slide,.45,y,9.08,.82,PALE,LINE)
@@ -409,17 +408,22 @@ def build(status):
           "A nonempty link is not evidence of durable availability. Source publication and video upload must be independently checked while signed out.")
 
     slide=prs.slides[14]
-    # Fill the organizer's blank branded slide with checkable sources and limits.
-    text(slide,.43,.81,9.1,.45,"Evidence, assumptions and scope",24,INK,True)
-    text(slide,.46,1.46,9.02,.56,"Our claim is controlled, inspectable recovery of synthetic incidents. The pilot must establish business value.",18,INK)
+    # Use the organizer's extra branded slide for measured-value framing and sources.
+    text(slide,.43,.81,9.1,.48,"Business value: a pilot hypothesis",24,INK,True)
+    text(slide,.46,1.44,9.02,.57,"Reduce the time operators spend reconstructing an incident, while making every permitted recovery inspectable.",17,INK)
+    box(slide,.45,2.16,4.30,2.52,GREEN_BG,LINE)
+    text(slide,.65,2.34,3.90,.30,"ILLUSTRATIVE STAFF CAPACITY",11,GREEN,True)
+    text(slide,.65,2.80,3.90,.57,"$250k / year",31,GREEN,True)
+    text(slide,.65,3.54,3.90,.92,"10m orders × 1% incidents × 50% assisted\n× 10 minutes saved ÷ 60 × $30/hour",13,INK)
+    text(slide,5.04,2.19,4.45,.33,"Evidence behind the problem",14,INK,True)
     sources=[("Stripe webhook guidance","https://docs.stripe.com/webhooks","Duplicate events establish why recovery must reconcile authoritative state."),
              ("Stripe idempotent requests","https://docs.stripe.com/api/idempotent_requests","Safe request retries are an established engineering control."),
              ("Temporal sagas and compensation","https://temporal.io/blog/compensating-actions-part-of-a-complete-breakfast-with-sagas","Partial workflows and application-specific compensation predate this prototype.")]
     for i,(label,url,description) in enumerate(sources):
-        y=2.26+i*.76
-        shp=text(slide,.51,y,8.96,.25,label,13,BLUE,True);hyperlink(shp,url)
-        text(slide,.51,y+.32,8.96,.31,description,12,MUTED)
-    foot(slide,15,"Primary technical sources checked 18 October 2026. These sources do not substantiate a product savings figure.")
+        y=2.75+i*.57
+        shp=text(slide,5.04,y,4.36,.34,label,12,BLUE,True);hyperlink(shp,url)
+    text(slide,5.04,4.49,4.36,.41,"Measure handling time, safe coverage and review effort in a pilot.",11.5,MUTED)
+    foot(slide,15,"Hypothetical inputs; not measured savings. Gross staff capacity excludes integration, cloud and review costs.")
     notes(slide,"All official template headers, footers, cover artwork and closing artwork are preserved. "
           "Slide 2 remains as a hidden organizer note. This extra evidence slide occupies the original blank branded slide. "
           "Savings assumptions are documented in docs/IMPACT.md. Full controller and provider evidence is in the repository artifacts.")
@@ -432,12 +436,23 @@ def build(status):
           "Do not promise competition qualification or claim production readiness.")
 
     prs.core_properties.title="Workflow Rescue by sustAInX — AI Builder Cup 2026"
-    prs.core_properties.subject="Official-template submission draft; evidence-linked enterprise workflow recovery"
+    prs.core_properties.subject="Official-template pitch; evidence-linked enterprise workflow recovery"
     prs.core_properties.author="sustAInX"
     prs.core_properties.keywords="Gemini, enterprise recovery, AI Builder Cup, sustAInX"
+    # The organizer's download directions are not a submission content section.
+    # Remove this instruction-only slide so PPTX and PDF have the same numbering.
+    instruction = prs.slides._sldIdLst[1]
+    prs.part.drop_rel(instruction.rId)
+    prs.slides._sldIdLst.remove(instruction)
+    speaker_notes = DOCS / "official-speaker-notes.json"
+    if speaker_notes.is_file():
+        paragraphs = json.loads(speaker_notes.read_text(encoding="utf-8"))["slides"]
+        assert len(paragraphs) == len(prs.slides), "Each visible slide needs presenter notes."
+        for slide, paragraph in zip(prs.slides, paragraphs):
+            notes(slide, paragraph["notes"])
     prs.save(OUTPUT)
     report={"pptx":str(OUTPUT),"template":str(TEMPLATE),"slides":len(prs.slides),
-            "hidden_slides":[2],"google_suite_passed":google_pass,
+            "hidden_slides":[],"google_suite_passed":google_pass,
             "gemini_models":model_names,
             "gemini_correct":gemini.get("correct",0) if gemini else 0,
             "gemini_safety_check_failures":gemini.get("safety_issues") if gemini else None,
@@ -461,8 +476,9 @@ def render():
         pres.Export(str(out),"PNG",1600,900)
     finally:
         if pres is not None:pres.Close()
-        app.Quit()
-    slides=[p for p in out.glob("Slide*.PNG") if p.stem!="Slide2"]
+        if app.Presentations.Count == 0:
+            app.Quit()
+    slides=[p for p in out.glob("Slide*.PNG") if 1 <= int(p.stem.replace("Slide","")) <= 15]
     slides.sort(key=lambda p:int(p.stem.replace("Slide","")))
     sheet=Image.new("RGB",(1200, len(slides)//3*254+(254 if len(slides)%3 else 0)),"#dbe1ea")
     draw=ImageDraw.Draw(sheet)

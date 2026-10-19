@@ -6,7 +6,7 @@
 
 1. The business grants scoped access to its service APIs and defines permitted recovery actions.
 2. An interrupted order enters the operations queue. The operator opens the incident and its customer mandate.
-3. Gemini chooses diagnostic tools and proposes a next step from observed receipts. It can request fresh evidence when stock changes.
+3. The controller gathers the mandatory initial receipts. Gemini proposes a recovery from that evidence and can request fresh observations when stock changes.
 4. Code checks permission, evidence, version and duplicate execution before a write.
 5. Separate checks verify the final payment, reservation and order. Uncertainty or irreversible dispatch leads to an operator handoff.
 6. The operator or reviewer inspects the trace and exports the audit record.
@@ -62,7 +62,7 @@ All numbers below are **hypothetical inputs, not industry estimates or measured 
 
 The earlier $500,000 example assumes **all 100,000 recovery incidents benefit**. At 50% coverage it is $250,000 before costs. At that latter figure, 4,000 equivalent adopters would arithmetically total $1 billion gross/year. We have not established that many suitable adopters or those savings; this is **not a market forecast, addressable market estimate or claim that we save a billion dollars**.
 
-For model cost, measure total input/output tokens and calls per completed or escalated case, then apply the selected Gemini model's current prices. Include billable thinking tokens and Cloud Run costs where applicable. The current Google live run is still unverified; Azure usage is not a Google cost quote.
+For model cost, measure total input/output tokens and calls per completed or escalated case, then apply the selected Gemini model's current prices. Include billable thinking tokens and hosting costs where applicable. The six reviewed live Gemini fixtures passed and record actual usage; a production cost estimate still needs representative traffic, integration and review costs.
 
 ## What to measure next
 

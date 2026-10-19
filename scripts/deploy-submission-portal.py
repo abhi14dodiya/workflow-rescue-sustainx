@@ -129,6 +129,12 @@ def main():
                 "content_type": response.headers.get("content-type"), "content_length": response.headers.get("content-length")}
             if response.status_code != 200:
                 raise SystemExit("A published submission asset failed its public HEAD check.")
+            downloaded = public.get(manifest["url"] + asset["path"], params={"release": version_name.rsplit("/", 1)[-1]})
+            downloaded_hash = hashlib.sha256(downloaded.content).hexdigest()
+            verification[asset["path"]].update(downloaded_bytes=len(downloaded.content),
+                sha256=downloaded_hash, matches_local_final=downloaded.status_code == 200 and downloaded_hash == asset["sha256"])
+            if not verification[asset["path"]]["matches_local_final"]:
+                raise SystemExit("A public download does not match its reviewed local source file.")
     result = {"published_at": datetime.now(timezone.utc).isoformat(), "url": manifest["url"],
               "portal_type": manifest["portal_type"], "release": release.get("name"), "version": version_name,
               "billing_enabled": False, "total_bytes": manifest["total_bytes"], "verification": verification}

@@ -115,10 +115,7 @@ def gemini_retry_delay(response, attempt):
 def provider_options() -> list[dict]:
     return [
         {"id": "rehearsal", "label": "Rehearsal · no AI", "configured": True, "model": "Deterministic reference planner"},
-        {"id": "gemini", "label": "Gemini API", "configured": bool(os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")), "model": os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")},
-        {"id": "vertex", "label": "Gemini on Vertex AI", "configured": bool(os.getenv("GOOGLE_CLOUD_PROJECT")), "model": os.getenv("VERTEX_MODEL", "gemini-3.8-flash")},
-        {"id": "openai", "label": "OpenAI · development", "configured": bool(os.getenv("OPENAI_API_KEY")), "model": os.getenv("OPENAI_MODEL", "gpt-4.1-mini")},
-        {"id": "azure", "label": "Azure OpenAI · development", "configured": bool(os.getenv("AZURE_OPENAI_API_KEY") and os.getenv("AZURE_OPENAI_BASE_URL") and os.getenv("AZURE_OPENAI_DEPLOYMENT")), "model": os.getenv("AZURE_OPENAI_DEPLOYMENT", "Deployment not configured")},
+        {"id": "gemini", "label": "Gemini API", "configured": bool(os.getenv("GEMINI_API_KEY")), "model": os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")},
     ]
 
 class Planner:
@@ -135,40 +132,17 @@ class Planner:
 
     async def generate(self, context: dict) -> Decision:
         option = next((p for p in provider_options() if p["id"] == self.provider), None)
-        if not option or not option["configured"]:
+        if self.provider != "gemini" or not option or not option["configured"]:
             raise ProviderError("NOT_CONFIGURED", "Configure this provider on the server before starting a live run.")
         schema = Decision.model_json_schema()
         prompt = json.dumps(context, ensure_ascii=False)
         headers = {"Content-Type": "application/json"}
-        if self.provider in {"openai", "azure"}:
-            if self.provider == "azure":
-                endpoint = os.environ["AZURE_OPENAI_BASE_URL"].rstrip("/") + "/responses"
-                headers["api-key"] = os.environ["AZURE_OPENAI_API_KEY"]
-            else:
-                endpoint = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1").rstrip("/") + "/responses"
-                headers["Authorization"] = "Bearer " + os.environ["OPENAI_API_KEY"]
-            payload = {"model": option["model"], "instructions": SYSTEM, "input": prompt, "max_output_tokens": 1800, "store": False,
-                       "text": {"format": {"type": "json_schema", "name": "recovery_action", "strict": True, "schema": schema}}}
-        else:
-            if self.provider == "gemini":
-                endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{option['model']}:generateContent"
-                headers["x-goog-api-key"] = os.getenv("GEMINI_API_KEY") or os.environ["GOOGLE_API_KEY"]
-            else:
-                try:
-                    import google.auth
-                    from google.auth.transport.requests import Request
-                    creds, _ = await asyncio.to_thread(google.auth.default, scopes=["https://www.googleapis.com/auth/cloud-platform"])
-                    await asyncio.to_thread(creds.refresh, Request())
-                except Exception:
-                    raise ProviderError("GOOGLE_AUTH", "Google Application Default Credentials are unavailable. Use gcloud auth application-default login locally or a Cloud Run service identity.") from None
-                project, location = os.environ["GOOGLE_CLOUD_PROJECT"], os.getenv("GOOGLE_CLOUD_LOCATION", "global")
-                host = "aiplatform.googleapis.com" if location == "global" else f"{location}-aiplatform.googleapis.com"
-                endpoint = f"https://{host}/v1/projects/{project}/locations/{location}/publishers/google/models/{option['model']}:generateContent"
-                headers["Authorization"] = "Bearer " + creds.token
-            payload = {"systemInstruction": {"parts": [{"text": SYSTEM}]},
-                       "contents": [{"role": "user", "parts": [{"text": prompt}]}],
-                       "generationConfig": {"maxOutputTokens": 4096,
-                                            "responseMimeType": "application/json", "responseJsonSchema": schema}}
+        endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{option['model']}:generateContent"
+        headers["x-goog-api-key"] = os.environ["GEMINI_API_KEY"]
+        payload = {"systemInstruction": {"parts": [{"text": SYSTEM}]},
+                   "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+                   "generationConfig": {"maxOutputTokens": 4096,
+                                        "responseMimeType": "application/json", "responseJsonSchema": schema}}
         for attempt in range(3):
             if self.provider == 'gemini':
                 self.metrics['quota_wait_ms'] += await GEMINI_PACER.wait(self.on_wait)
@@ -208,23 +182,13 @@ class Planner:
             raise ProviderError(code, detail)
         try:
             body = response.json()
-            if self.provider in {"openai", "azure"}:
-                raw = "".join(p.get("text", "") for o in body.get("output", []) for p in o.get("content", []) if p.get("type") == "output_text")
-                usage = body.get("usage", {})
-                self.metrics["input_tokens"] += usage.get("input_tokens", 0)
-                self.metrics["output_tokens"] += usage.get("output_tokens", 0)
-                if body.get("status") not in {None, "completed"}:
-                    raise ProviderError("INCOMPLETE_MODEL_OUTPUT", "The model did not complete its response. No proposal from this call was executed.")
-                if any(p.get("type") == "refusal" for o in body.get("output", []) for p in o.get("content", [])):
-                    raise ProviderError("MODEL_REFUSAL", "The model declined to propose an action. Review the incident; no proposal from this call was executed.")
-            else:
-                candidate = body["candidates"][0]
-                if candidate.get("finishReason") not in {None, "STOP"}:
-                    raise ProviderError("INCOMPLETE_MODEL_OUTPUT", "Google did not complete an action response. Check output limits or safety feedback; no proposal from this call was executed.")
-                raw = "".join(p.get("text", "") for p in candidate["content"]["parts"] if not p.get("thought"))
-                usage = body.get("usageMetadata", {})
-                self.metrics["input_tokens"] += usage.get("promptTokenCount", 0)
-                self.metrics["output_tokens"] += usage.get("candidatesTokenCount", 0)
+            candidate = body["candidates"][0]
+            if candidate.get("finishReason") not in {None, "STOP"}:
+                raise ProviderError("INCOMPLETE_MODEL_OUTPUT", "Google did not complete an action response. Check output limits or safety feedback; no proposal from this call was executed.")
+            raw = "".join(p.get("text", "") for p in candidate["content"]["parts"] if not p.get("thought"))
+            usage = body.get("usageMetadata", {})
+            self.metrics["input_tokens"] += usage.get("promptTokenCount", 0)
+            self.metrics["output_tokens"] += usage.get("candidatesTokenCount", 0)
             return Decision.model_validate_json(raw)
         except (ValueError, KeyError, IndexError, TypeError, ValidationError):
             raise ProviderError("INVALID_MODEL_OUTPUT", "The model response did not match the permitted action schema. It was not executed.") from None

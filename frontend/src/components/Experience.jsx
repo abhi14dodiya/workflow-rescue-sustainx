@@ -50,6 +50,7 @@ export default function Experience({ reduced, onEnter, recovery, onEvidence }) {
   const [cursor, setCursor] = useState(null);
   const [playing, setPlaying] = useState(false);
   const { run, busy, checking, scenario, provider, config, error } = recovery;
+  const historicalProvider = run?.provider && !['gemini', 'rehearsal'].includes(run.provider);
   const finished = run && !['running', 'queued'].includes(run.status);
   const workflow = useMemo(() => projectWorkflow(run, cursor), [run, cursor]);
   const node = workflow.nodes[selected];
@@ -88,9 +89,9 @@ export default function Experience({ reduced, onEnter, recovery, onEvidence }) {
         <h1 id="hero-title">Every promise.<br />Back in<br /><span>alignment.</span></h1>
         <p className="hero-description">For operations teams recovering interrupted orders. Reconcile payment, stock and the customer’s request—with evidence at every step.</p>
         <div className="hero-actions"><button id="watch-recovery" className="button primary hero-cta" onClick={recovery.start} disabled={busy || checking || !config || !scenario}>{busy ? <LoaderCircle className="spin" size={17} /> : <Play size={16} fill="currentColor" />} {busy ? 'Recovery in progress' : run ? 'Start a new recovery' : 'Watch recovery'} <ArrowUpRight size={18} /></button><button className="button text hero-desk-link" onClick={onEnter}>Open recovery desk <ArrowUpRight size={15} /></button></div>
-        <div className="hero-scenario"><span className="scenario-caption">CURRENT INCIDENT</span><strong>{scenario?.name || 'Loading the workspace…'}</strong><span>{provider === 'rehearsal' ? 'Rehearsal · deterministic planner · no AI calls' : provider === 'azure' ? 'Azure OpenAI · live development planner' : provider === 'openai' ? 'OpenAI · development provider' : 'Google AI · live model proposals'}</span></div>
+        <div className="hero-scenario"><span className="scenario-caption">CURRENT INCIDENT</span><strong>{scenario?.name || 'Loading the workspace…'}</strong><span>{historicalProvider ? `${run.provider} · historical audit record` : provider === 'rehearsal' ? 'Rehearsal · deterministic planner · no AI calls' : 'Gemini · live model proposals'}</span></div>
         {error && <p role="alert" className="hero-error">{error}</p>}
-        <div className="hero-signature"><span className="signature-icon"><Sparkles size={16} /></span><span>{provider === 'azure' ? 'Reason with Azure AI.' : provider === 'openai' ? 'Reason with OpenAI.' : provider === 'rehearsal' ? 'Built for Gemini.' : 'Reason with Gemini.'}<br /><strong>Verify with code.</strong></span><span className="signature-rule" /><span className="signature-note">Three services.<br />One customer promise.</span></div>
+        <div className="hero-signature"><span className="signature-icon"><Sparkles size={16} /></span><span>{historicalProvider ? 'Inspect the recorded evidence.' : provider === 'rehearsal' ? 'Built for Gemini.' : 'Reason with Gemini.'}<br /><strong>Verify with code.</strong></span><span className="signature-rule" /><span className="signature-note">Three services.<br />One customer promise.</span></div>
       </div>
       <div className="sculpture-panel" data-renderer={fallback ? 'static' : ready ? 'webgl' : 'loading'} data-phase={workflow.phase} data-aligned={workflow.aligned}>
         <div className="scene-topline"><span><Radio size={12} /> THE RECOVERY CORE</span><span>{fallback ? 'SELECT A SERVICE' : 'CLICK A CRYSTAL · DRAG TO ROTATE'} <MoveUpRight size={11} /></span></div>

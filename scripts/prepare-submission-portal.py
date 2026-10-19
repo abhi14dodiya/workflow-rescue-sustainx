@@ -18,8 +18,10 @@ from urllib.parse import urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 PUBLIC = ROOT / "artifacts" / "submission-portal"
 ASSETS = [
-    ("deck_pptx", "docs/Workflow-Rescue-Official-Pitch.pptx", "Workflow-Rescue-Official-Pitch.pptx"),
-    ("deck_pdf", "docs/Workflow-Rescue-Official-Pitch.pdf", "Workflow-Rescue-Official-Pitch.pdf"),
+    ("deck_pptx", "docs/Workflow-Rescue-Official-Pitch-Reviewed.pptx", "Workflow-Rescue-Official-Pitch-Reviewed.pptx"),
+    ("deck_pdf", "docs/Workflow-Rescue-Official-Pitch-Reviewed.pdf", "Workflow-Rescue-Official-Pitch-Reviewed.pdf"),
+    ("deck_pptx_previous_link", "docs/Workflow-Rescue-Official-Pitch-Reviewed.pptx", "Workflow-Rescue-Official-Pitch.pptx"),
+    ("deck_pdf_previous_link", "docs/Workflow-Rescue-Official-Pitch-Reviewed.pdf", "Workflow-Rescue-Official-Pitch.pdf"),
     ("video", "artifacts/video/workflow-rescue-demo.mp4", "workflow-rescue-demo.mp4"),
 ]
 

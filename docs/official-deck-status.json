@@ -11,7 +11,7 @@
   "cloudrun_verified": false,
   "python_tests": 83,
   "js_tests": 8,
-  "interface_image": "C:/Users/VS992VN/Documents/workflow-rescue/artifacts/custom-incident-lab.png",
+  "interface_image": "C:/Users/VS992VN/Documents/workflow-rescue/docs/images/pitch-video-incident-lab.png",
   "verification_image": "C:/Users/VS992VN/Documents/workflow-rescue/artifacts/custom-gemini-verification.png",
   "verification_label": "Actual Gemini 3.5 Flash-Lite: custom incident, 4 model calls, 46.4 seconds including pacing; audit saved in Firestore.",
   "hosting_note": "Current backend: temporary Google Cloud Shell demo. Persistent Cloud Run hosting is not yet deployed.",

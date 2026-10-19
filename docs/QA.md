@@ -1,10 +1,10 @@
-# Prototype QA - 18 October 2026
+# Prototype QA - 19 October 2026
 
 ## Verified results
 
 | Area | Result | Evidence |
 |---|---|---|
-| Python controller, API, provider and persistence checks | PASS: 83 tests | `python -m pytest -q`; includes quota pacing, bounded retry, daily exhaustion, custom input validation and audit-save completion. |
+| Python controller, API, provider and persistence checks | PASS: 81 tests | `python -m pytest -q`; includes quota pacing, bounded retry, daily exhaustion, custom input validation, streaming cancellation and audit-save completion. |
 | Recorded-state projection | PASS: 8 tests | `npm --prefix frontend test`; future evidence isolation and final-state correctness. |
 | Live Gemini evaluation | PASS: 6/6 reviewed fixtures, zero safety-check failures | `docs/validation/evaluation-gemini.json`; actual Gemini 3.5 Flash-Lite calls through public deployment. |
 | Desktop/mobile browser flow | PASS | `docs/validation/browser-validation.json`; 320px and 390px layouts, Home reload, history race, keyboard controls, reduced motion, no-WebGL fallback and audit download. |
@@ -14,7 +14,7 @@
 | Firestore server access | PASS in Cloud Shell probe | `docs/validation/firestore-cloud-roundtrip.json`; write/read comparison and deletion of the exact synthetic probe. |
 | Custom incident runtime and restart persistence | PASS | `docs/validation/custom-incident-browser.json` and `firestore-runtime-restart.json`; actual UI import, changed recovery outcome, saved audit restored after backend restart. |
 | Public source repository | PASS | Public GitHub repository, README and API source returned HTTP 200 without credentials; published commit matched the reviewed local tree. |
-| Official deck | Organizer template used | `Workflow-Rescue-Official-Pitch.pptx` and `.pdf`; registered names still need confirmation. |
+| Official deck | Organizer template used | `Workflow-Rescue-Official-Pitch-Reviewed.pptx` and `.pdf`; registered names still need confirmation. |
 | Narrated video | PASS: 210.05 seconds | `docs/validation/video-qa.json` and `video-manifest.json`; actual public-app Gemini recording, offline Microsoft Zira narration, complete decode and visual/audio review. |
 | Durable Cloud Run deployment | NOT COMPLETE | Cloud Shell is temporary; Firebase static hosting cannot execute the Python backend. |
 
@@ -41,3 +41,15 @@ All business services and customer data are simulated. JSON import changes a bou
 The current public backend is session-bound Cloud Shell hosting. A permanent Firebase materials page does not make that backend durable. The user's rules require all APIs to remain functional throughout evaluation; Cloud Run, registered team details and final dashboard submission remain open until separately verified.
 
 The illustrative impact calculation is a staffing-capacity hypothesis, not measured savings. No billion-dollar savings or finalist qualification is claimed.
+
+## Historical development evidence
+
+Earlier development used Azure OpenAI before the current Gemini-only integration. The retained usage audit records 31 historical calls. Those calls are not Gemini results, and removing the retired integration does not erase that history. Previous evaluation files, recordings and audit records retain their original provider names and metrics. They are historical evidence, not configuration instructions for the current app.
+
+The current selectable planners are Gemini and explicitly labelled no-AI rehearsal. Retired provider credentials and options are not part of the current integration. Opening a historical report preserves its recorded provider while any new run uses a supported current planner.
+
+The Gemini-only cleanup had 79 passing Python tests. Request-bound streaming adds two checks, bringing the current suite to 81. The frontend has 11 passing checks and the optional Node runtime has 137. Earlier presentation and evaluation artifacts keep their original validation counts and provider provenance.
+
+## Managed-host deployment readiness
+
+The UI now receives recovery records through a live HTTP event stream. The request stays open through the Firestore save; disconnecting cancels further recovery actions. Local browser validation passed JSON import, a fresh rehearsal, displayed verification and audit export without model calls. These checks establish local readiness, not a successful Cloud Run deployment. Hosted Gemini, runtime identity and restart restoration must be verified after hosting access is available.

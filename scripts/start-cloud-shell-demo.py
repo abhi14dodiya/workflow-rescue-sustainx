@@ -16,6 +16,9 @@ import time
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from app.environment import APP_SETTINGS
+
 ART = ROOT / 'artifacts'
 ART.mkdir(exist_ok=True)
 
@@ -29,17 +32,19 @@ if not key:
     raise SystemExit('GEMINI_API_KEY is missing from the server-only .env file.')
 os.chmod(ROOT / '.env', 0o600)
 
-# No other model provider is configured in this public demonstration process.
-env = {k:v for k,v in os.environ.items() if not k.startswith(('AZURE_OPENAI_', 'OPENAI_', 'GOOGLE_CLOUD_', 'VERTEX_'))
-       and k not in {'GOOGLE_API_KEY', 'GOOGLE_APPLICATION_CREDENTIALS', 'DEMO_ACCESS_TOKEN'}}
-env.update(GEMINI_API_KEY=key, GEMINI_MODEL=values.get('GEMINI_MODEL', 'gemini-3.8-flash'),
+# Only Gemini is an AI provider. Keep Google ADC/metadata settings needed by
+# Firestore, while excluding credentials for unrelated model services.
+sensitive = re.compile(r'API_?KEY|ACCESS_?TOKEN|AUTH_?TOKEN|PASSWORD|SECRET|PRIVATE_KEY', re.I)
+model_suffixes = ('_BASE_URL', '_DEPLOYMENT', '_MODEL', '_API_VERSION', '_ENDPOINT')
+env = {k:v for k,v in os.environ.items()
+       if k in APP_SETTINGS or not (sensitive.search(k) or k.endswith(model_suffixes))}
+env.pop('DEMO_ACCESS_TOKEN', None)
+env.update(GEMINI_API_KEY=key, GEMINI_MODEL=values.get('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
            DEFAULT_PROVIDER='gemini', MAX_ACTIVE_RUNS='1', MAX_MODEL_CALLS_PER_HOUR='60')
 if values.get('FIRESTORE_PROJECT_ID'):
     env['FIRESTORE_PROJECT_ID'] = values['FIRESTORE_PROJECT_ID']
-    # Cloud Shell may supply ADC through its credential-broker configuration.
-    # Preserve the inherited path for Firestore, without enabling a Vertex project.
-    if os.environ.get('GOOGLE_APPLICATION_CREDENTIALS'):
-        env['GOOGLE_APPLICATION_CREDENTIALS'] = os.environ['GOOGLE_APPLICATION_CREDENTIALS']
+if values.get('DEMO_ACCESS_TOKEN'):
+    env['DEMO_ACCESS_TOKEN'] = values['DEMO_ACCESS_TOKEN']
 
 port = None
 for candidate in (8080, 8081, 8082):

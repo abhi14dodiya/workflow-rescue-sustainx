@@ -37,6 +37,6 @@ The current examples are simulated; no production integrations, measured custome
 | Deployed prototype | **Pending durable verified URL** |
 | GitHub repository | https://github.com/abhi14dodiya/workflow-rescue-sustainx (public access verified) |
 | Demonstration video | **Pending public 3–4-minute video URL** |
-| Prescribed-template deck | [Official-template PPTX](Workflow-Rescue-Official-Pitch.pptx); registered names still required |
+| Prescribed-template deck | [Official-template PPTX](Workflow-Rescue-Official-Pitch-Reviewed.pptx); registered names still required |
 
 Replace every pending value before submission and test all links while signed out.

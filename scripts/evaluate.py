@@ -1,4 +1,4 @@
-"""Run the frozen six-case suite. Live providers consume quota and require credentials."""
+"""Run the reviewed six-case suite. Live Gemini consumes quota; rehearsal does not."""
 import argparse
 import asyncio
 import json
@@ -13,8 +13,7 @@ import httpx
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT))
-from dotenv import load_dotenv
-load_dotenv(ROOT/".env")
+from app.environment import configure_environment
 from app.runner import run_recovery, fixed_baseline
 from app.scenarios import scenario, SCENARIOS
 from app.domain import now
@@ -35,6 +34,8 @@ async def deployed_run(client, identifier, provider):
 
 
 async def evaluate(provider, client=None, base_url=None):
+    if provider not in {'rehearsal', 'gemini'}:
+        raise ValueError('Only Gemini or deterministic rehearsal is supported.')
     cases=[]
     for identifier in SCENARIOS:
         fixture=scenario(identifier)
@@ -60,6 +61,8 @@ async def evaluate(provider, client=None, base_url=None):
 
 
 async def main(provider, base_url):
+    if provider not in {'rehearsal', 'gemini'}:
+        raise ValueError('Only Gemini or deterministic rehearsal is supported.')
     if not base_url:
         return await evaluate(provider)
     url = urlsplit(base_url)
@@ -76,7 +79,10 @@ async def main(provider, base_url):
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("--provider",choices=["rehearsal","gemini","vertex","openai","azure"],default="rehearsal")
+    parser.add_argument("--provider",choices=["rehearsal","gemini"],default="rehearsal")
     parser.add_argument('--base-url', help='Evaluate the public HTTPS deployment instead of calling the model locally.')
     args=parser.parse_args()
+    # This CLI process does not retain unrelated model credentials from its
+    # parent. Importing the evaluator in tests has no environment side effects.
+    configure_environment(ROOT / '.env')
     raise SystemExit(asyncio.run(main(args.provider, args.base_url)))

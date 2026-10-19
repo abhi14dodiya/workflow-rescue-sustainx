@@ -23,27 +23,28 @@ def test_invalid_scenario_and_unknown_run():
 
 def test_provider_config_never_contains_credential(monkeypatch):
     monkeypatch.setenv("GEMINI_API_KEY","test-secret-do-not-return")
-    monkeypatch.setenv("AZURE_OPENAI_API_KEY","azure-secret-do-not-return")
+    monkeypatch.setenv("UNRELATED_API_KEY","unrelated-secret-do-not-return")
     with TestClient(app) as client:
         r = client.get("/api/config")
         assert "test-secret-do-not-return" not in r.text
-        assert "azure-secret-do-not-return" not in r.text
+        assert "unrelated-secret-do-not-return" not in r.text
+        assert {p["id"] for p in r.json()["providers"]} == {"gemini", "rehearsal"}
         assert next(p for p in r.json()["providers"] if p["id"] == "gemini")["configured"]
 
 def test_default_planner_requires_complete_configuration_and_never_starts_a_run(monkeypatch):
-    monkeypatch.setenv('DEFAULT_PROVIDER','azure')
-    monkeypatch.setenv('AZURE_OPENAI_API_KEY','test-only')
-    monkeypatch.setenv('AZURE_OPENAI_DEPLOYMENT','test-deployment')
-    monkeypatch.delenv('AZURE_OPENAI_BASE_URL',raising=False)
+    monkeypatch.setenv('DEFAULT_PROVIDER','gemini')
+    monkeypatch.delenv('GEMINI_API_KEY',raising=False)
     with TestClient(app) as client:
         assert client.get('/api/config').json()['default_provider'] == 'rehearsal'
-        monkeypatch.setenv('AZURE_OPENAI_BASE_URL','https://test.openai.azure.com/openai/v1')
-        assert client.get('/api/config').json()['default_provider'] == 'azure'
+        monkeypatch.setenv('GEMINI_API_KEY','test-only')
+        assert client.get('/api/config').json()['default_provider'] == 'gemini'
+        monkeypatch.setenv('DEFAULT_PROVIDER','unsupported-provider')
+        assert client.get('/api/config').json()['default_provider'] == 'rehearsal'
+
 
 def test_live_token_gate_and_unconfigured_provider(monkeypatch):
     monkeypatch.setenv("DEMO_ACCESS_TOKEN","local-demo-gate")
     monkeypatch.delenv("GEMINI_API_KEY",raising=False)
-    monkeypatch.delenv("GOOGLE_API_KEY",raising=False)
     with TestClient(app) as client:
         assert client.post("/api/runs",json={"provider":"gemini"}).status_code == 403
         assert client.post("/api/runs",json={"provider":"gemini"},headers={"X-Demo-Token":"local-demo-gate"}).status_code == 409

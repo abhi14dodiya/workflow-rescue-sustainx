@@ -1,17 +1,17 @@
 # Official pitch materials
 
-Use **Workflow-Rescue-Official-Pitch.pptx**, not the older custom six-page deck.
+Use **Workflow-Rescue-Official-Pitch-Reviewed.pptx**, not the older custom six-page deck.
 It is populated from the organizer's actual PowerPoint template, downloaded from:
 
 https://docs.google.com/presentation/d/13rg7vW43mEH6DkpuusAE6fdoEylSFz8waNpE4RLzoUg/export/pptx
 
 The original remains in `AI-Builder-Cup-Official-Template.pptx`. The populated deck
 preserves its cover, header, footer, required sections and closing artwork. It has
-16 slides; the original download-instructions slide is hidden. The matching PDF
-therefore has 15 pages. The original blank branded slide contains cited sources.
+15 visible slides; the instruction-only download slide is removed. The matching PDF
+also has 15 pages. The original blank branded slide contains cited sources.
 All substantive slide content is editable. Speaker notes explain evidence and limits.
 
-## Current draft inputs
+## Build inputs
 
 `official-deck-status.json` controls the registered leader name, the three public
 links, deployment status flags, verified local test counts and optional fresh
@@ -23,7 +23,7 @@ that have actually been published and checked. `firestore_verified` means the
 application runtime's persistence works, not merely that a database probe passed.
 
 The latest user-supplied submission instructions say the video must be **3–4
-minutes**. This draft applies those instructions, despite the older template's
+minutes**. This deck applies those instructions, despite the older template's
 3-minute link label. Target approximately 3:30 and show working functionality.
 
 Do not mark Firebase, Firestore or Cloud Run verified until the respective live
@@ -59,3 +59,5 @@ Check that all public links open while signed out, the registered leader is
 correct, the outcome evidence is current, and every technology claim matches the
 deployment. The existence of a deck does not mean the competition form has been
 submitted.
+
+The reviewed version replaces the initial deck: slide numbering, text fit, example consistency, screenshot readability and speaker notes were corrected. Use the Reviewed filename; earlier local copies are retained. The registered leader field and durable Cloud Run deployment remain unresolved.

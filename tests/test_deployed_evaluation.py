@@ -26,11 +26,11 @@ def test_failed_deployed_connection_does_not_start_scenarios(monkeypatch):
         return httpx.Response(502, json={'ok':False, 'error':{'code':'GATEWAY_403'}})
     original = httpx.AsyncClient
     monkeypatch.setattr(evaluate.httpx, 'AsyncClient', lambda **kw: original(transport=httpx.MockTransport(respond), **kw))
-    assert asyncio.run(evaluate.main('vertex', 'https://example.run.app')) == 1
+    assert asyncio.run(evaluate.main('gemini', 'https://example.run.app')) == 1
     assert [request.url.path for request in requests] == ['/api/provider-check']
 
 
 @pytest.mark.parametrize('origin', ['http://example.run.app', 'https://user:secret@example.run.app', 'https://example.run.app/?token=secret'])
 def test_remote_evaluator_rejects_insecure_or_credential_bearing_urls(origin):
     with pytest.raises(ValueError):
-        asyncio.run(evaluate.main('vertex', origin))
+        asyncio.run(evaluate.main('gemini', origin))
